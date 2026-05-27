@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>動態固定欄位表格系統</title>
+    <!-- 思源黑體 (Noto Sans CJK) 與 翔鶴黑體 (Shojumaru Gothic)-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css" />
+
+</head>
+
+<body>
+    <div class="container">
+        <h1>台北捷運 ECMU 表格查詢與顯示範例</h1>
+
+        <div class="control-panel">
+            <div class="content-summary" onclick="toggleContent(this)">    
+                <p><span class="toggle-icon"></span>展開／收合 功能</p> 
+            </div>
+            <div class="content-details">
+                <div class="control-row">
+                    <div class="control-group">
+                        <label for="recordCount">資料筆數：</label>
+                        <select id="recordCount">
+                            <option value="50">50 筆</option>
+                            <option value="100" selected>100 筆</option>
+                            <option value="500">500 筆</option>
+                            <option value="1000">1000 筆</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="stickyCount">固定欄位數：</label>
+                        <input type="number" id="stickyCount" min="0" max="10" value="2">
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="toggleStickyColumns()">
+                        📌 切換固定欄位
+                    </button>
+
+                    <button class="btn btn-danger" onclick="clearStickyColumns()">
+                        🗑️ 清除固定
+                    </button>
+
+                </div>
+
+                <div class="control-row">
+                    <div class="control-group">
+                        <label for="searchInput">搜尋：</label>
+                        <input type="text" id="searchInput" placeholder="輸入關鍵字搜尋..." onkeyup="searchTable()">
+                    </div>
+
+                    <!-- <div class="control-group">
+                    <label for="sortColumn">排序欄位：</label>
+                    <select id="sortColumn">
+                        <option value="0">員工ID</option>
+                        <option value="1">姓名</option>
+                        <option value="2">部門</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-primary" onclick="sortTable()">
+                    🔀 排序
+                </button> -->
+
+                    <button class="btn btn-primary" onclick="generateTable()">
+                        ⟳ 更新表格
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-info">
+            <div id="tableInfo">
+                <strong>表格資訊：</strong>
+                <span id="columnCount">105</span> 個欄位，
+                <span id="rowCount">100</span> 筆資料，固定
+                <span id="stickyInfo">2</span> 個欄位（主鍵欄位或稱左側凍結欄）
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div id="loadingIndicator" class="loading">
+                <div class="spinner"></div>
+                正在產生表格資料...
+            </div>
+            <table id="dataTable" class="data-table" style="display: none;">
+                <thead id="tableHead"></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+    <script src="./app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,339 @@
+/* 引入 Google 字體 Noto Sans TC（支援繁體中文） */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Noto Sans TC", 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #5ECBC3 0%, #007AB0 100%);
+    min-height: 100vh;
+}
+
+.container {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 25px;
+    text-align: center;
+    font-size: 28px;
+    background: linear-gradient(45deg, #5ECBC3, #007AB0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* 控制面板 */
+.control-panel {
+    /* display: flex;
+    flex-wrap: wrap;
+    align-items: center; */
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #dee2e6;
+}
+
+.control-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.control-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.control-group label {
+    font-weight: 500;
+    padding: 12px;
+    color: #495057;
+    white-space: nowrap;
+}
+
+.control-group input,
+.control-group select {
+    padding: 6px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #5ECBC3, #007AB0);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #4b5358;
+}
+
+.btn-danger {
+    background: #FC8561;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #FC5421;
+}
+
+/* 表格容器 */
+.table-container {
+    overflow-x: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background: white;
+    max-width: 100%;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+/* 表格基本樣式 */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.data-table th,
+.data-table td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+    border-right: 1px solid #dee2e6;
+    white-space: nowrap;
+    font-size: 13px;
+    min-width: 80px;
+}
+
+.data-table th {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.3s ease;
+}
+
+.data-table th:hover {
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+    transform: translateY(-1px);
+}
+
+/* 排序圖示容器 */
+.sort-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.sort-icons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0.3;
+    transition: opacity 0.3s ease;
+}
+
+.sort-icon {
+    font-size: 10px;
+    line-height: 1;
+    transition: all 0.3s ease;
+}
+
+.sort-icon.up {
+    margin-bottom: 1px;
+}
+
+.sort-icon.down {
+    margin-top: 1px;
+}
+
+/* 排序狀態樣式 */
+.sort-header:hover .sort-icons {
+    opacity: 0.7;
+}
+
+.sort-header.sorted .sort-icons {
+    opacity: 1;
+}
+
+.sort-header.sorted.asc .sort-icon.up {
+    color: #2ECC71;
+    transform: scale(1.2);
+}
+
+.sort-header.sorted.desc .sort-icon.down {
+    color: #FC8561;
+    transform: scale(1.2);
+}
+
+/* 固定欄位表頭排序樣式 */
+.sticky-column.header .sort-header:hover {
+    background: none;
+}
+
+.sticky-column.header .sort-icons {
+    opacity: 0.7;
+}
+
+.sticky-column.header .sort-header.sorted .sort-icons {
+    opacity: 1;
+}
+
+.sticky-column.header .sort-header.sorted.asc .sort-icon.up,
+.sticky-column.header .sort-header.sorted.desc .sort-icon.down {
+    color: #ffffff;
+    text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+}
+
+.data-table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.data-table tr:hover {
+    background-color: #e3f2fd;
+}
+
+/* 固定欄位樣式 */
+.sticky-column {
+    position: sticky;
+    background-color: white;
+    z-index: 10;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+/* 固定欄位表頭樣式 - 同時固定垂直和水平位置 */
+.sticky-column.header {
+    background: linear-gradient(135deg, #FFFACD 0%, #FC8561 100%);
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1), 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.data-table tr:nth-child(even) .sticky-column {
+    background-color: #f8f9fa;
+}
+
+.data-table tr:hover .sticky-column {
+    background-color: #e3f2fd;
+}
+
+/* ID欄位特殊樣式 */
+.id-column {
+    font-weight: bold;
+    color: #007bff;
+    min-width: 100px;
+}
+
+/* 狀態指示器 */
+.status-info {
+    background: #e7f3ff;
+    border-left: 4px solid #2196f3;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 0 6px 6px 0;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+.spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #667eea;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 10px;
+}
+
+/* 預設狀態 */
+.content-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+/* 展開狀態 */
+.content-details.active {
+    max-height: 500px;
+    transition: max-height 0.5s ease-in;
+}
+
+.toggle-icon::after {
+    content: '▸';
+    margin-left: 10px;
+}
+
+.toggle-icon.active::after {
+    content: '▼';
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .control-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .control-group {
+        justify-content: space-between;
+    }
+}

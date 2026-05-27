@@ -1,0 +1,564 @@
+/* 引入 Google 字體 Noto Sans TC（支援繁體中文） */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+
+/* 全域預設排版設定：取消內外邊距、啟用 box-sizing:border-box */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 全站 body 基本設定 */
+body {
+    font-family: "Noto Sans TC", 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* 網站最大寬度設定，並置中 */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* 頁面標題 h1 樣式 */
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 2.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 所有連結不加底線 */
+a {
+    text-decoration: none; /* 移除所有連結的底線 */
+    
+}
+
+/* 上方控制區塊（排序按鈕容器） */
+.controls {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 排序按鈕容器 */
+.sort-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 排序標籤文字 */
+.sort-label {
+    font-weight: 600;
+    color: #333;
+    margin-right: 10px;
+}
+
+/* 排序按鈕樣式 */
+.sort-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 25px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* 滑鼠移入排序按鈕時動畫 */
+.sort-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* 被選中的排序按鈕狀態 */
+.sort-btn.active {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    transform: scale(1.05);
+}
+
+/* 每一個色系群組區塊 */
+.color-group {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* 滑鼠移入群組整塊的動畫效果 */
+.color-group:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* 群組標題（可點擊收合） */
+.group-header {
+    padding: 20px;
+    cursor: pointer;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6));
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+/* 滑鼠移入群組標題變更背景 */
+.group-header:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+}
+
+/* 群組標題文字 */
+.group-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #333;
+}
+
+/* 收合箭頭圖示 */
+.toggle-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+    color: #666;
+}
+
+/* 收合時旋轉箭頭 */
+.group-header.collapsed .toggle-icon {
+    transform: rotate(-90deg);
+}
+
+/* 色塊容器（卡片網格） */
+.color-grid {
+    padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    /* grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); */
+    gap: 15px;
+    transition: all 0.3s ease;
+    /* max-height: 2000px;
+    overflow: hidden; */
+    height: auto; /* 讓高度自動撐開 */
+    max-height: none;/* 移除高度限制 */
+    overflow: visible;/* 顯示所有內容 */
+}
+
+/* 收合時隱藏網格 */
+.color-grid.collapsed {
+    /* display: none; */
+    /* max-height: none; */
+    max-height: 0;
+    padding: 0 20px;
+}
+
+/* 顏色卡片樣式 */
+.color-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+/* 滑鼠移入卡片動畫 */
+.color-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* 上方顯示顏色色塊區域 */
+.color-block {
+    height: 120px;
+    width: 100%;
+    position: relative;
+    cursor: pointer;
+}
+
+/* 卡片下方資訊區塊 */
+.color-info {
+    padding: 15px;
+}
+
+/* HEX 色碼顯示 */
+.color-code {
+    font-family: 'Courier New', monospace;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+
+.color-details {
+    font-size: 0.85rem;
+    color: #666;
+    line-height: 1.4;
+}
+
+/* 顏色中文名稱 */
+.color-name {
+    font-weight: 600;
+    margin-bottom: 4px;
+    text-align: center;
+}
+
+/* HSV 值區塊排列 */
+.hsv-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+/* 每個 HSV 小框框 */
+.hsv-item {
+    text-align: center;
+    padding: 4px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+}
+
+/* 複製提示文字樣式（預設隱藏） */
+.copy-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* 顯示複製訊息 */
+.copy-message.show {
+    opacity: 1;
+}
+
+/* -------- 下面為字體與規範相關樣式 -------- */
+
+/* 字體規範樣式 */
+.font-section {
+    margin-top: 30px;
+}
+
+.font-guidelines-content {
+    padding: 0;
+}
+
+.font-category {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    margin: 0 0 20px 0;
+}
+
+.font-category h3 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+    border-bottom: 2px solid #0268b7;
+    padding-bottom: 10px;
+}
+
+.font-demo {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+}
+
+.font-name {
+    font-weight: bold;
+    color: #0268b7;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.font-sample {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 15px 0;
+    color: #333;
+}
+
+/* 標明 serif 字體用 */
+.font-sample.serif {
+    font-family: 'Noto Serif TC', serif;
+}
+
+.font-description {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.primary-font {
+    border-left: 4px solid #0268b7;
+}
+
+.secondary-font {
+    border-left: 4px solid #5ECBC3;
+}
+
+.font-demos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+/* 色彩規範 */
+.guidelines-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.guideline-item {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.guideline-item.correct {
+    border-left: 4px solid #006833;
+}
+
+.guideline-item.incorrect {
+    border-left: 4px solid #FC8561;
+}
+
+.guideline-title {
+    font-weight: bold;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.guideline-item.correct .guideline-title {
+    color: #006833;
+}
+
+.guideline-item.incorrect .guideline-title {
+    color: #FC8561;
+}
+
+
+.logo-demo {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 15px 0;
+    text-align: center;
+    padding: 10px;
+    background: #f0f0f0;
+    border-radius: 4px;
+}
+
+.correct-spacing {
+    letter-spacing: normal;
+}
+
+.incorrect-spacing {
+    letter-spacing: -0.1em;
+    color: #FC8561;
+}
+
+.guideline-text {
+    font-size: 0.9rem;
+    color: #666;
+    line-height: 1.5;
+}
+
+.color-usage-demos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.usage-demo {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.demo-title {
+    padding: 15px;
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.05);
+    text-align: center;
+}
+
+/* 色彩使用示範區塊 */
+.demo-bg {
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.demo-bg.dark-bg {
+    background: #25587F;
+}
+
+.demo-bg.light-bg {
+    background: #f4f4f4;
+}
+
+.demo-bg.colorful-bg {
+    background: linear-gradient(45deg, #5ECBC3, #0268b7);
+}
+
+.demo-logo {
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.3;
+}
+
+.white-text {
+    color: white;
+}
+
+.black-text {
+    color: #333;
+}
+
+.demo-desc {
+    padding: 15px;
+    font-size: 0.9rem;
+    color: #666;
+    text-align: center;
+}
+
+.spacing-demo {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.spacing-example {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.safe-area {
+    padding: 40px;
+    border: 2px dashed #0268b7;
+    background: rgba(2, 104, 183, 0.05);
+    border-radius: 8px;
+    position: relative;
+}
+
+.safe-area::before {
+    content: '淨空範圍';
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    background: white;
+    padding: 0 10px;
+    color: #0268b7;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.logo-placeholder {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #0268b7;
+    text-align: center;
+}
+
+.spacing-note {
+    flex: 1;
+    font-size: 0.9rem;
+    color: #666;
+    line-height: 1.6;
+}
+
+/* ------- 響應式設計：手機與小螢幕 ------- */
+@media (max-width: 768px) {
+    .color-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .group-title {
+        font-size: 1.2rem;
+    }
+
+    .sort-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .sort-btn {
+        margin: 5px 0;
+    }
+
+    .font-demos {
+        grid-template-columns: 1fr;
+    }
+
+    .guidelines-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .color-usage-demos {
+        grid-template-columns: 1fr;
+    }
+
+    .spacing-example {
+        flex-direction: column;
+        gap: 20px;
+    }
+}
+
+/* 回到頂部按鈕 */
+#back-to-top {
+    display: none; /* 預設隱藏 */
+    position: fixed; /* 固定在視窗中 */
+    bottom: 20px; /* 距離底部 20px */
+    right: 20px; /* 距離右側 20px */
+    background-color: #007bff; /* 背景顏色 */
+    color: white; /* 文字顏色 */
+    padding: 10px 15px; /* 內邊距 */
+    border-radius: 5px; /* 圓角 */
+    text-decoration: none; /* 移除下劃線 */
+    font-size: 24px; /* 字體大小 */
+    line-height: 1; /* 行高 */
+    z-index: 1000; /* 確保按鈕在其他內容之上 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 陰影效果 */
+    transition: background-color 0.3s ease; /* 背景顏色過渡效果 */
+}
+
+#back-to-top:hover {
+    background-color: #0056b3; /* 懸停時的背景顏色 */
+}
