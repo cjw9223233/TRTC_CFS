@@ -1,3 +1,4 @@
+/* ─── Data ───────────────────────────────────────── */
 const palette = [
     { hex: '#0268B7', name: '主視覺藍', usage: '品牌主色、標題重點、主要按鈕' },
     { hex: '#0079B0', name: '捷運藍', usage: '資訊標示、連結、次要重點' },
@@ -87,11 +88,12 @@ const templateOptions = {
     }
 };
 
+/* ─── Color Utilities ────────────────────────────── */
 function hexToHsv(hex) {
-    const normalizedHex = hex.replace('#', '');
-    const r = parseInt(normalizedHex.slice(0, 2), 16) / 255;
-    const g = parseInt(normalizedHex.slice(2, 4), 16) / 255;
-    const b = parseInt(normalizedHex.slice(4, 6), 16) / 255;
+    const n = hex.replace('#', '');
+    const r = parseInt(n.slice(0, 2), 16) / 255;
+    const g = parseInt(n.slice(2, 4), 16) / 255;
+    const b = parseInt(n.slice(4, 6), 16) / 255;
     const max = Math.max(r, g, b);
     const min = Math.min(r, g, b);
     const delta = max - min;
@@ -99,8 +101,8 @@ function hexToHsv(hex) {
 
     if (delta !== 0) {
         if (max === r) h = ((g - b) / delta) % 6;
-        if (max === g) h = (b - r) / delta + 2;
-        if (max === b) h = (r - g) / delta + 4;
+        else if (max === g) h = (b - r) / delta + 2;
+        else h = (r - g) / delta + 4;
     }
 
     h = Math.round(h * 60);
@@ -115,7 +117,6 @@ function hexToHsv(hex) {
 
 function getColorCategory(color) {
     const { h, s } = hexToHsv(color.hex);
-
     if (s < 20) return 'grays';
     if (h >= 0 && h < 45) return 'reds';
     if (h >= 60 && h < 160) return 'greens';
@@ -126,14 +127,32 @@ function getColorCategory(color) {
 
 function sortPalette(sortType) {
     const colors = [...palette];
-
     if (sortType === 'hue') return colors.sort((a, b) => hexToHsv(a.hex).h - hexToHsv(b.hex).h);
     if (sortType === 'brightness') return colors.sort((a, b) => hexToHsv(b.hex).v - hexToHsv(a.hex).v);
     if (sortType === 'saturation') return colors.sort((a, b) => hexToHsv(b.hex).s - hexToHsv(a.hex).s);
-
     return colors;
 }
 
+/* ─── Toast Notification ─────────────────────────── */
+function showToast(hex, name, success = true) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast${success ? ' success' : ''}`;
+    toast.innerHTML = `
+        <span class="toast-swatch" style="background:${hex}" aria-hidden="true"></span>
+        <span>${success ? '已複製' : '複製失敗'} ${name} <strong>${hex}</strong></span>
+    `;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.animation = 'toastOut 0.25s ease forwards';
+        setTimeout(() => toast.remove(), 260);
+    }, 2000);
+}
+
+/* ─── Color Card ─────────────────────────────────── */
 function createColorCard(color) {
     const hsv = hexToHsv(color.hex);
     const card = document.createElement('article');
@@ -144,6 +163,7 @@ function createColorCard(color) {
     button.type = 'button';
     button.style.backgroundColor = color.hex;
     button.dataset.color = color.hex;
+    button.dataset.name = color.name;
     button.setAttribute('aria-label', `複製 ${color.name} ${color.hex}`);
     button.innerHTML = '<span class="copy-message" aria-hidden="true">已複製</span>';
 
@@ -164,6 +184,7 @@ function createColorCard(color) {
     return card;
 }
 
+/* ─── Color Group ────────────────────────────────── */
 function createGroup(title, colors, id) {
     const group = document.createElement('section');
     group.className = 'color-group';
@@ -173,7 +194,7 @@ function createGroup(title, colors, id) {
     header.type = 'button';
     header.setAttribute('aria-expanded', 'true');
     header.setAttribute('aria-controls', id);
-    header.innerHTML = `<span>${title} (${colors.length})</span><span class="toggle-icon" aria-hidden="true">▼</span>`;
+    header.innerHTML = `<span>${title} <span style="opacity:0.6;font-weight:400">(${colors.length})</span></span><span class="toggle-icon" aria-hidden="true">▼</span>`;
 
     const grid = document.createElement('div');
     grid.className = 'color-grid';
@@ -184,36 +205,63 @@ function createGroup(title, colors, id) {
     return group;
 }
 
-function renderColors(sortType = 'category') {
+/* ─── Render Colors ──────────────────────────────── */
+function renderColors(sortType = 'category', filterQuery = '') {
     const display = document.getElementById('color-display');
+    const countEl = document.getElementById('color-count');
     display.replaceChildren();
 
-    if (sortType === 'category') {
+    const query = filterQuery.trim().toLowerCase();
+    const filtered = query
+        ? palette.filter(c => c.name.toLowerCase().includes(query) || c.hex.toLowerCase().includes(query) || c.usage.toLowerCase().includes(query))
+        : palette;
+
+    if (countEl) {
+        countEl.textContent = query ? `找到 ${filtered.length} 個顏色` : '';
+    }
+
+    if (filtered.length === 0) {
+        const msg = document.createElement('p');
+        msg.className = 'no-results';
+        msg.textContent = `找不到符合「${filterQuery}」的顏色`;
+        display.appendChild(msg);
+        return;
+    }
+
+    if (sortType === 'category' && !query) {
         const groups = palette.reduce((acc, color) => {
-            const category = getColorCategory(color);
-            acc[category] = acc[category] || [];
-            acc[category].push(color);
+            const cat = getColorCategory(color);
+            acc[cat] = acc[cat] || [];
+            acc[cat].push(color);
             return acc;
         }, {});
 
-        Object.keys(categoryNames).forEach(category => {
-            if (groups[category]?.length) {
-                display.appendChild(createGroup(categoryNames[category], groups[category], `palette-${category}`));
+        Object.keys(categoryNames).forEach(cat => {
+            if (groups[cat]?.length) {
+                display.appendChild(createGroup(categoryNames[cat], groups[cat], `palette-${cat}`));
             }
         });
         return;
     }
 
-    const titles = {
-        hue: '依色相排序',
-        brightness: '依明度排序',
-        saturation: '依彩度排序'
-    };
-    display.appendChild(createGroup(titles[sortType], sortPalette(sortType), `palette-${sortType}`));
+    if (query) {
+        display.appendChild(createGroup(`搜尋結果`, filtered, 'palette-search'));
+        return;
+    }
+
+    const titles = { hue: '依色相排序', brightness: '依明度排序', saturation: '依彩度排序' };
+    const sorted = [...filtered].sort((a, b) => {
+        if (sortType === 'hue') return hexToHsv(a.hex).h - hexToHsv(b.hex).h;
+        if (sortType === 'brightness') return hexToHsv(b.hex).v - hexToHsv(a.hex).v;
+        if (sortType === 'saturation') return hexToHsv(b.hex).s - hexToHsv(a.hex).s;
+        return 0;
+    });
+    display.appendChild(createGroup(titles[sortType], sorted, `palette-${sortType}`));
 }
 
+/* ─── Color Selects ──────────────────────────────── */
 function getColorByHex(hex) {
-    return palette.find(color => color.hex === hex) || palette[0];
+    return palette.find(c => c.hex === hex) || palette[0];
 }
 
 function populateColorSelect(select, selectedHex) {
@@ -229,9 +277,14 @@ function populateColorSelect(select, selectedHex) {
     });
 }
 
+function updateSelectDot(dotId, hex) {
+    const dot = document.getElementById(dotId);
+    if (dot) dot.style.background = hex;
+}
+
+/* ─── Generator ──────────────────────────────────── */
 function getDecisionState(form) {
     const formData = new FormData(form);
-
     return {
         primary: getColorByHex(formData.get('primaryColor')),
         accent: getColorByHex(formData.get('accentColor')),
@@ -301,11 +354,11 @@ function renderGeneratedPreview(state) {
                     <h4>色卡決策</h4>
                     <div class="decision-swatches">
                         <span style="background:${state.primary.hex}"></span>
-                        <div><strong>${state.primary.name}</strong><small>${state.primary.hex} / ${state.primary.usage}</small></div>
+                        <div><strong>${state.primary.name}</strong><small>${state.primary.hex} · ${state.primary.usage}</small></div>
                     </div>
                     <div class="decision-swatches">
                         <span style="background:${state.accent.hex}"></span>
-                        <div><strong>${state.accent.name}</strong><small>${state.accent.hex} / ${state.accent.usage}</small></div>
+                        <div><strong>${state.accent.name}</strong><small>${state.accent.hex} · ${state.accent.usage}</small></div>
                     </div>
                 </section>
                 <section>
@@ -329,54 +382,159 @@ function initDecisionGenerator() {
     const form = document.getElementById('brand-generator-form');
     if (!form) return;
 
-    populateColorSelect(document.getElementById('primaryColor'), '#0268B7');
-    populateColorSelect(document.getElementById('accentColor'), '#5ECBC3');
+    const primarySelect = document.getElementById('primaryColor');
+    const accentSelect = document.getElementById('accentColor');
+
+    populateColorSelect(primarySelect, '#0268B7');
+    populateColorSelect(accentSelect, '#5ECBC3');
+
+    updateSelectDot('primary-dot', '#0268B7');
+    updateSelectDot('accent-dot', '#5ECBC3');
+
     renderGeneratedPreview(getDecisionState(form));
 
+    // Live preview on any change
+    form.addEventListener('change', () => {
+        const state = getDecisionState(form);
+        updateSelectDot('primary-dot', state.primary.hex);
+        updateSelectDot('accent-dot', state.accent.hex);
+        renderGeneratedPreview(state);
+    });
+
+    // Submit button still works (smooth scroll to preview)
     form.addEventListener('submit', event => {
         event.preventDefault();
-        renderGeneratedPreview(getDecisionState(form));
+        const state = getDecisionState(form);
+        renderGeneratedPreview(state);
         document.getElementById('generated-preview').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 }
 
-async function copyColor(hex, swatch) {
+/* ─── Copy Color ─────────────────────────────────── */
+async function copyColor(hex, name, swatch) {
     try {
         if (navigator.clipboard?.writeText) {
             await navigator.clipboard.writeText(hex);
         } else {
-            const input = document.createElement('textarea');
-            input.value = hex;
-            input.setAttribute('readonly', '');
-            input.style.position = 'fixed';
-            input.style.opacity = '0';
-            document.body.appendChild(input);
-            input.select();
+            const ta = document.createElement('textarea');
+            ta.value = hex;
+            ta.style.cssText = 'position:fixed;opacity:0';
+            document.body.appendChild(ta);
+            ta.select();
             document.execCommand('copy');
-            input.remove();
+            ta.remove();
         }
-
-        const message = swatch.querySelector('.copy-message');
-        message.textContent = '已複製';
-        message.classList.add('show');
-        setTimeout(() => message.classList.remove('show'), 1200);
+        showToast(hex, name, true);
     } catch {
-        const message = swatch.querySelector('.copy-message');
-        message.textContent = '複製失敗';
-        message.classList.add('show');
-        setTimeout(() => message.classList.remove('show'), 1200);
+        showToast(hex, name, false);
     }
 }
 
-function bindEvents() {
-    document.querySelectorAll('.sort-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            renderColors(button.dataset.sort);
+/* ─── Scroll Reveal ──────────────────────────────── */
+function initScrollReveal() {
+    const els = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry, i) => {
+            if (entry.isIntersecting) {
+                entry.target.style.transitionDelay = `${i * 0.04}s`;
+                entry.target.classList.add('visible');
+                io.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    els.forEach(el => io.observe(el));
+}
+
+/* ─── Reading Progress Bar ───────────────────────── */
+function initProgressBar() {
+    const bar = document.getElementById('progress-bar');
+    if (!bar) return;
+
+    function update() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const pct = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
+        bar.style.width = `${pct}%`;
+        bar.setAttribute('aria-valuenow', pct);
+    }
+
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+}
+
+/* ─── Sticky Nav Active State ────────────────────── */
+function initStickyNav() {
+    const nav = document.querySelector('.sticky-nav');
+    if (!nav) return;
+
+    const links = nav.querySelectorAll('.nav-links a[data-section]');
+    const sections = [...links].map(a => document.getElementById(a.dataset.section)).filter(Boolean);
+
+    function update() {
+        // Scrolled shadow
+        nav.classList.toggle('scrolled', window.scrollY > 60);
+
+        // Active link
+        let current = null;
+        const navH = nav.offsetHeight;
+
+        sections.forEach(sec => {
+            const top = sec.getBoundingClientRect().top - navH - 16;
+            if (top <= 0) current = sec.id;
+        });
+
+        links.forEach(link => {
+            link.classList.toggle('active', link.dataset.section === current);
+        });
+    }
+
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+}
+
+/* ─── Color Search ───────────────────────────────── */
+function initColorSearch() {
+    const searchInput = document.getElementById('color-search');
+    if (!searchInput) return;
+
+    let activeSortType = 'category';
+    let searchTimeout;
+
+    searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            renderColors(activeSortType, searchInput.value);
+        }, 180);
+    });
+
+    // Expose sort type for search integration
+    document.querySelectorAll('.sort-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            activeSortType = btn.dataset.sort;
         });
     });
 
+    return {
+        getSortType: () => activeSortType,
+        getQuery: () => searchInput.value
+    };
+}
+
+/* ─── Event Binding ──────────────────────────────── */
+function bindEvents() {
+    const searchCtrl = initColorSearch();
+
+    // Sort buttons
+    document.querySelectorAll('.sort-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+            renderColors(button.dataset.sort, searchCtrl?.getQuery() || '');
+        });
+    });
+
+    // Color copy & group collapse
     document.getElementById('color-display').addEventListener('click', event => {
         const header = event.target.closest('.group-header');
         if (header) {
@@ -389,20 +547,34 @@ function bindEvents() {
         }
 
         const swatch = event.target.closest('.color-swatch');
-        if (swatch) copyColor(swatch.dataset.color, swatch);
+        if (swatch) copyColor(swatch.dataset.color, swatch.dataset.name, swatch);
     });
 
+    // Keyboard: Enter on color swatch
+    document.getElementById('color-display').addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+            const swatch = event.target.closest('.color-swatch');
+            if (swatch) copyColor(swatch.dataset.color, swatch.dataset.name, swatch);
+        }
+    });
+
+    // Back to top
     const backToTop = document.getElementById('back-to-top');
     window.addEventListener('scroll', () => {
-        backToTop.classList.toggle('show', window.scrollY > 300);
-    });
+        backToTop.classList.toggle('show', window.scrollY > 400);
+    }, { passive: true });
+
     backToTop.addEventListener('click', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 }
 
+/* ─── Init ───────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
     renderColors('category');
     initDecisionGenerator();
     bindEvents();
+    initScrollReveal();
+    initProgressBar();
+    initStickyNav();
 });

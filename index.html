@@ -11,14 +11,19 @@
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
+
+    <!-- Reading Progress Bar -->
+    <div id="progress-bar" role="progressbar" aria-label="閱讀進度" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+
+    <!-- Header -->
     <header class="site-header">
         <div class="container header-layout">
             <div>
                 <p class="eyebrow">The New Metro Taipei / Our Lifestyle</p>
-                <h1>台北捷運資訊系統 UI/UX 字體與色彩設計指引</h1>
-                <p class="lead">依據北捷文件 CI 使用注意事項與簡報模板，整理品牌色彩、字體、Logo 使用與簡報版型規範。</p>
+                <h1>台北捷運資訊系統<br>UI/UX 設計指引</h1>
+                <p class="lead">依據北捷 CI 使用注意事項，整理品牌色彩、字體、Logo 使用與簡報版型規範。</p>
             </div>
-            <nav class="quick-links" aria-label="主頁導覽">
+            <nav class="quick-links" aria-label="快速導覽">
                 <a href="#colors">品牌色卡</a>
                 <a href="#font-guidelines">字體規範</a>
                 <a href="#logo-rules">Logo 使用</a>
@@ -29,40 +34,57 @@
         </div>
     </header>
 
+    <!-- Sticky Navigation -->
+    <nav class="sticky-nav" aria-label="章節導覽">
+        <div class="container">
+            <span class="nav-brand">台北捷運 CI 設計指引</span>
+            <div class="nav-links">
+                <a href="#colors" data-section="colors">品牌色卡</a>
+                <a href="#font-guidelines" data-section="font-guidelines">字體規範</a>
+                <a href="#logo-rules" data-section="logo-rules">Logo 使用</a>
+                <a href="#presentation" data-section="presentation">簡報模板</a>
+                <a href="#decision-generator" data-section="decision-generator">品牌產生器</a>
+            </div>
+        </div>
+    </nav>
+
     <main class="container">
+
+        <!-- Overview -->
         <section class="overview-grid" aria-labelledby="overview-title">
             <div class="section-heading">
                 <p class="eyebrow">CI Overview</p>
                 <h2 id="overview-title">規範重點</h2>
             </div>
-            <article class="summary-card">
+            <article class="summary-card reveal">
                 <span class="summary-index">01</span>
                 <h3>完整使用</h3>
                 <p>標誌與搭配文字不可任意裁切、變形、旋轉、壓縮或更動字距。</p>
             </article>
-            <article class="summary-card">
+            <article class="summary-card reveal">
                 <span class="summary-index">02</span>
                 <h3>字體優先序</h3>
                 <p>委外設計優先採翔鶴黑體；內部或網頁製作可採思源黑體。</p>
             </article>
-            <article class="summary-card">
+            <article class="summary-card reveal">
                 <span class="summary-index">03</span>
                 <h3>背景辨識</h3>
                 <p>依底圖明暗與複雜度使用彩色、黑色、反白或反黑版本，避免外框補救。</p>
             </article>
-            <article class="summary-card">
+            <article class="summary-card reveal">
                 <span class="summary-index">04</span>
                 <h3>模板一致</h3>
                 <p>簡報封面與內容頁維持標題層級、章節導覽與重點資訊版式。</p>
             </article>
         </section>
 
-        <section id="colors" class="panel" aria-labelledby="colors-title">
+        <!-- Brand Colors -->
+        <section id="colors" class="panel reveal" aria-labelledby="colors-title">
             <div class="panel-header">
                 <div>
                     <p class="eyebrow">Brand Palette</p>
                     <h2 id="colors-title">品牌色卡</h2>
-                    <p>點擊色塊可複製 HEX。排序功能保留色系、色相、明度與彩度檢視。</p>
+                    <p>點擊色塊複製 HEX。可依色系、色相、明度或彩度排序，亦可搜尋色名。</p>
                 </div>
                 <div class="toolbar" role="group" aria-label="色卡排序">
                     <button class="sort-btn active" type="button" data-sort="category">色系分類</button>
@@ -71,10 +93,18 @@
                     <button class="sort-btn" type="button" data-sort="saturation">彩度</button>
                 </div>
             </div>
+            <div class="color-search-wrap">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="search" id="color-search" placeholder="搜尋色名或 HEX…" aria-label="搜尋顏色" autocomplete="off">
+                <span class="color-count" id="color-count" aria-live="polite"></span>
+            </div>
             <div id="color-display" class="color-display" aria-live="polite"></div>
         </section>
 
-        <section id="font-guidelines" class="panel" aria-labelledby="font-title">
+        <!-- Typography -->
+        <section id="font-guidelines" class="panel reveal" aria-labelledby="font-title">
             <div class="panel-header">
                 <div>
                     <p class="eyebrow">Typography</p>
@@ -96,7 +126,8 @@
             </div>
         </section>
 
-        <section id="logo-rules" class="panel" aria-labelledby="logo-title">
+        <!-- Logo Usage -->
+        <section id="logo-rules" class="panel reveal" aria-labelledby="logo-title">
             <div class="panel-header">
                 <div>
                     <p class="eyebrow">Logo Usage</p>
@@ -128,7 +159,7 @@
                     </ul>
                 </article>
             </div>
-            <div class="usage-grid" aria-label="背景色使用示意">
+            <div class="usage-grid" style="margin-top:16px" aria-label="背景色使用示意">
                 <article class="usage-card dark-bg">
                     <h3>深色底圖</h3>
                     <p>採反白或全白文字，確保辨識。</p>
@@ -150,7 +181,8 @@
             </div>
         </section>
 
-        <section id="presentation" class="panel" aria-labelledby="presentation-title">
+        <!-- Presentation Template -->
+        <section id="presentation" class="panel reveal" aria-labelledby="presentation-title">
             <div class="panel-header">
                 <div>
                     <p class="eyebrow">Presentation Template</p>
@@ -184,22 +216,29 @@
             </div>
         </section>
 
-        <section id="decision-generator" class="panel generator-panel" aria-labelledby="generator-title">
+        <!-- Brand Generator -->
+        <section id="decision-generator" class="panel generator-panel reveal" aria-labelledby="generator-title">
             <div class="panel-header">
                 <div>
                     <p class="eyebrow">Decision Preview</p>
                     <h2 id="generator-title">品牌應用產生器</h2>
-                    <p>選擇色卡、字體、Logo 與簡報模板後，產生一個同頁動態網頁預覽，協助比較未來使用方向。</p>
+                    <p>選擇色卡、字體、Logo 與簡報模板，即時預覽品牌視覺組合。</p>
                 </div>
             </div>
-            <form class="generator-form" id="brand-generator-form">
+            <form class="generator-form" id="brand-generator-form" aria-label="品牌組合設定">
                 <div class="form-field">
                     <label for="primaryColor">主色卡</label>
-                    <select id="primaryColor" name="primaryColor"></select>
+                    <div class="select-wrap">
+                        <span class="select-dot" id="primary-dot" aria-hidden="true"></span>
+                        <select id="primaryColor" name="primaryColor"></select>
+                    </div>
                 </div>
                 <div class="form-field">
                     <label for="accentColor">輔助色卡</label>
-                    <select id="accentColor" name="accentColor"></select>
+                    <div class="select-wrap">
+                        <span class="select-dot" id="accent-dot" aria-hidden="true"></span>
+                        <select id="accentColor" name="accentColor"></select>
+                    </div>
                 </div>
                 <div class="form-field">
                     <label for="fontChoice">字體</label>
@@ -224,13 +263,20 @@
                         <option value="metrics">重點數據式</option>
                     </select>
                 </div>
-                <button class="generate-btn" type="submit">產生視覺化預覽</button>
+                <button class="generate-btn" type="submit">套用預覽</button>
             </form>
+            <div class="preview-status" id="preview-status" aria-live="polite">即時預覽已啟用 — 調整選項後預覽自動更新</div>
             <div class="generated-preview" id="generated-preview" aria-live="polite"></div>
         </section>
+
     </main>
 
+    <!-- Toast Container -->
+    <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Back to top -->
     <button id="back-to-top" type="button" aria-label="回到最上方">↑</button>
+
     <script src="./app.js"></script>
 </body>
 </html>
