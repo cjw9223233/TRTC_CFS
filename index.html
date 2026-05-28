@@ -1,144 +1,236 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>色彩展示板</title>
-    <!-- 思源黑體 (Noto Sans CJK) 與 翔鶴黑體 (Shojumaru Gothic)-->
+    <meta name="description" content="台北捷運資訊系統 UI/UX 字體與色彩設計指引">
+    <title>台北捷運資訊系統 UI/UX 字體與色彩設計指引</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-    <div class="container">
-        <h1> 台北捷運 ECMU 色彩與字體規範</h1>
-        
-        <div class="controls">
-            <div class="sort-buttons">
-                <span class="sort-label">色彩排序：</span>
-                <button class="sort-btn active" onclick="sortColors('category')">色系分類</button>
-                <button class="sort-btn" onclick="sortColors('hue')">色相 (Hue)</button>
-                <button class="sort-btn" onclick="sortColors('brightness')">明度 (Brightness)</button>
-                <button class="sort-btn" onclick="sortColors('saturation')">彩度 (Saturation)</button>
-                <span class="sort-label">應用連結：</span>
-                <button class="sort-btn" >
-                    <a href="#font-guidelines">字體規範與展示</a>
-                </button>
-                <button class="sort-btn">
-                    <a href="/TRTC/files/TRTC_logo.7z" >下載logo</a>
-                </button>
-                <button class="sort-btn">
-                    <a href="./act_now/index.html">應用範例</a>
-                </button>
+    <header class="site-header">
+        <div class="container header-layout">
+            <div>
+                <p class="eyebrow">The New Metro Taipei / Our Lifestyle</p>
+                <h1>台北捷運資訊系統 UI/UX 字體與色彩設計指引</h1>
+                <p class="lead">依據北捷文件 CI 使用注意事項與簡報模板，整理品牌色彩、字體、Logo 使用與簡報版型規範。</p>
             </div>
+            <nav class="quick-links" aria-label="主頁導覽">
+                <a href="#colors">品牌色卡</a>
+                <a href="#font-guidelines">字體規範</a>
+                <a href="#logo-rules">Logo 使用</a>
+                <a href="#presentation">簡報模板</a>
+                <a href="./files/TRTC_logo.7z" download>下載 Logo</a>
+                <a href="./act_now/index.html">應用範例</a>
+            </nav>
         </div>
+    </header>
 
-        <div id="color-display"></div>
+    <main class="container">
+        <section class="overview-grid" aria-labelledby="overview-title">
+            <div class="section-heading">
+                <p class="eyebrow">CI Overview</p>
+                <h2 id="overview-title">規範重點</h2>
+            </div>
+            <article class="summary-card">
+                <span class="summary-index">01</span>
+                <h3>完整使用</h3>
+                <p>標誌與搭配文字不可任意裁切、變形、旋轉、壓縮或更動字距。</p>
+            </article>
+            <article class="summary-card">
+                <span class="summary-index">02</span>
+                <h3>字體優先序</h3>
+                <p>委外設計優先採翔鶴黑體；內部或網頁製作可採思源黑體。</p>
+            </article>
+            <article class="summary-card">
+                <span class="summary-index">03</span>
+                <h3>背景辨識</h3>
+                <p>依底圖明暗與複雜度使用彩色、黑色、反白或反黑版本，避免外框補救。</p>
+            </article>
+            <article class="summary-card">
+                <span class="summary-index">04</span>
+                <h3>模板一致</h3>
+                <p>簡報封面與內容頁維持標題層級、章節導覽與重點資訊版式。</p>
+            </article>
+        </section>
 
-        <!-- 字體規範區塊 -->
-        <div class="font-section">
-            <div class="color-group">
-                <div class="group-header" onclick="toggleGroup('font-guidelines')">
-                    <div class="group-title">📝 字體規範與展示</div>
-                    <div class="toggle-icon">▼</div>
+        <section id="colors" class="panel" aria-labelledby="colors-title">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Brand Palette</p>
+                    <h2 id="colors-title">品牌色卡</h2>
+                    <p>點擊色塊可複製 HEX。排序功能保留色系、色相、明度與彩度檢視。</p>
                 </div>
-                <div class="color-grid" id="font-guidelines" >
-                    <div class="font-guidelines-content">
-                        <div class="font-category">
-                            <h3>🏢 優先建議字體</h3>
-                            <div class="font-demo primary-font">
-                                <div class="font-name">翔鶴黑體</div>
-                                <div class="font-sample">台北捷運 Taipei Metro</div>
-                                <div class="font-description">製作與設計時優先採用，需授權</div>
-                            </div>
-                        </div>
+                <div class="toolbar" role="group" aria-label="色卡排序">
+                    <button class="sort-btn active" type="button" data-sort="category">色系分類</button>
+                    <button class="sort-btn" type="button" data-sort="hue">色相</button>
+                    <button class="sort-btn" type="button" data-sort="brightness">明度</button>
+                    <button class="sort-btn" type="button" data-sort="saturation">彩度</button>
+                </div>
+            </div>
+            <div id="color-display" class="color-display" aria-live="polite"></div>
+        </section>
 
-                        <div class="font-category">
-                            <h3>👥 可使用字體</h3>
-                            <div class="font-demos">
-                                <div class="font-demo secondary-font">
-                                    <div class="font-name">思源黑體 (Noto Sans)</div>
-                                    <div class="font-sample">台北捷運 Taipei Metro</div>
-                                    <div class="font-description">由 Google 和 Adobe 合作開發的開源字體，採用 Apache 2.0 授權，可以免費商用和用於網頁</div>
-                                </div>
-                                <!-- <div class="font-demo secondary-font">
-                                    <div class="font-name">思源宋體 (Noto Serif)</div>
-                                    <div class="font-sample serif">台北捷運 Taipei Metro</div>
-                                    <div class="font-description">內部製作可採用</div>
-                                </div> -->
-                            </div>
-                        </div>
+        <section id="font-guidelines" class="panel" aria-labelledby="font-title">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Typography</p>
+                    <h2 id="font-title">字體規範</h2>
+                    <p>字體選擇依 CI 注意事項整理，網頁以可取得且可商用的思源黑體作為基準。</p>
+                </div>
+            </div>
+            <div class="two-column">
+                <article class="rule-card accent-blue">
+                    <h3>翔鶴黑體</h3>
+                    <p class="font-sample">台北捷運 Taipei Metro</p>
+                    <p>委外設計或正式設計物優先採用，需確認授權與輸出環境。</p>
+                </article>
+                <article class="rule-card accent-green">
+                    <h3>思源黑體 Noto Sans TC</h3>
+                    <p class="font-sample noto">台北捷運 Taipei Metro</p>
+                    <p>內部同仁自行製作、網頁與一般文件可採用，便於跨平台顯示。</p>
+                </article>
+            </div>
+        </section>
 
-                        <div class="font-category">
-                            <h3>⚠️ 字體使用規範</h3>
-                            <div class="guidelines-grid">
-                                <div class="guideline-item correct">
-                                    <div class="guideline-title">✅ 正確用法</div>
-                                    <div class="guideline-demo">
-                                        <div class="logo-demo correct-spacing">台北捷運</div>
-                                        <div class="guideline-text">• 完整使用，不可任意裁切<br>• 保持標準字距<br>• 維持原始比例</div>
-                                    </div>
-                                </div>
-                                <div class="guideline-item incorrect">
-                                    <div class="guideline-title">❌ 錯誤用法</div>
-                                    <div class="guideline-demo">
-                                        <div class="logo-demo incorrect-spacing">台北捷運</div>
-                                        <div class="guideline-text">• 任意縮小文字字距<br>• 任意更改logo搭配文字<br>• 變形或裁切標誌</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="font-category">
-                            <h3>🎨 色彩應用規範</h3>
-                            <div class="color-usage-demos">
-                                <div class="usage-demo">
-                                    <div class="demo-title">深色背景</div>
-                                    <div class="demo-bg dark-bg">
-                                        <div class="demo-logo white-text">台北捷運<br>Taipei Metro</div>
-                                    </div>
-                                    <div class="demo-desc">深色底色應採用全白文字</div>
-                                </div>
-                                <div class="usage-demo">
-                                    <div class="demo-title">淺色背景</div>
-                                    <div class="demo-bg light-bg">
-                                        <div class="demo-logo black-text">台北捷運<br>Taipei Metro</div>
-                                    </div>
-                                    <div class="demo-desc">淺色底色應採用全黑文字</div>
-                                </div>
-                                <div class="usage-demo">
-                                    <div class="demo-title">彩色背景</div>
-                                    <div class="demo-bg colorful-bg">
-                                        <div class="demo-logo white-text">台北捷運<br>Taipei Metro</div>
-                                    </div>
-                                    <div class="demo-desc">彩色底色應採用全白</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="font-category">
-                            <h3>📏 淨空範圍與最小尺寸</h3>
-                            <div class="spacing-demo">
-                                <div class="spacing-example">
-                                    <div class="safe-area">
-                                        <div class="logo-placeholder">台北捷運</div>
-                                    </div>
-                                    <div class="spacing-note">
-                                        • logo淨空範圍內不可加入任何圖片、文字、色塊<br>
-                                        • 各版本標誌不可小於規範尺寸<br>
-                                        • 不可任意改變台北捷運字間距<br>
-                                        • 小介面應使用圖標較小版本
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        <section id="logo-rules" class="panel" aria-labelledby="logo-title">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Logo Usage</p>
+                    <h2 id="logo-title">Logo 使用注意事項</h2>
+                    <p>依 CI PDF 整理正確與錯誤用法，重點是完整性、辨識度與淨空。</p>
+                </div>
+            </div>
+            <div class="rules-grid">
+                <article class="rule-card correct">
+                    <h3>正確用法</h3>
+                    <div class="logo-stage standard-logo">
+                        <img class="logo-image" src="./files/台北捷運品牌標誌-中文橫式-大_彩色.png" alt="台北捷運品牌標誌中文橫式彩色版">
                     </div>
+                    <ul>
+                        <li>完整保留標誌與搭配文字。</li>
+                        <li>維持標準比例與字距。</li>
+                        <li>背景較深時使用反白或反黑版本。</li>
+                    </ul>
+                </article>
+                <article class="rule-card incorrect">
+                    <h3>錯誤用法</h3>
+                    <div class="logo-stage distorted-logo">
+                        <img class="logo-image" src="./files/台北捷運品牌標誌-中文橫式-大_彩色.png" alt="錯誤示意：被壓縮變形的台北捷運品牌標誌">
+                    </div>
+                    <ul>
+                        <li>任意縮小文字字距或更換搭配文字。</li>
+                        <li>裁切、壓縮、旋轉或改變標誌比例。</li>
+                        <li>在複雜背景上加外框，導致辨識性不佳。</li>
+                    </ul>
+                </article>
+            </div>
+            <div class="usage-grid" aria-label="背景色使用示意">
+                <article class="usage-card dark-bg">
+                    <h3>深色底圖</h3>
+                    <p>採反白或全白文字，確保辨識。</p>
+                </article>
+                <article class="usage-card light-bg">
+                    <h3>淺色底圖</h3>
+                    <p>採黑色或標準彩色版本。</p>
+                </article>
+                <article class="usage-card brand-bg">
+                    <h3>彩色底圖</h3>
+                    <p>視對比使用黑、白或反黑版本。</p>
+                </article>
+            </div>
+            <div class="safe-area-demo">
+                <div class="safe-area-box">
+                    <img class="logo-image safe-logo" src="./files/台北捷運品牌標誌-中文橫式-大_彩色.png" alt="台北捷運品牌標誌淨空範圍示意">
+                </div>
+                <p>淨空範圍內不可加入圖片、文字、色塊或其他裝飾元素；小尺寸應使用較簡潔版本，避免辨識不良。</p>
+            </div>
+        </section>
+
+        <section id="presentation" class="panel" aria-labelledby="presentation-title">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Presentation Template</p>
+                    <h2 id="presentation-title">簡報模板規範</h2>
+                    <p>依簡報模板範例補齊封面語彙、字級層級與內容版型方向。</p>
                 </div>
             </div>
-        </div>
-    </div>
-    <a href="#" id="back-to-top" title="回到最上層">↑</a>
+            <div class="presentation-grid">
+                <article class="slide-card cover-slide">
+                    <p>The New Metro Taipei</p>
+                    <h3>Our Lifestyle</h3>
+                    <span>報告單位 / 2024-00-00</span>
+                </article>
+                <article class="slide-card">
+                    <h3>字級層級</h3>
+                    <dl class="spec-list">
+                        <div><dt>標題</dt><dd>黑體 48</dd></div>
+                        <div><dt>副標</dt><dd>黑體 32</dd></div>
+                        <div><dt>報告單位</dt><dd>字級 26</dd></div>
+                        <div><dt>日期</dt><dd>字級 26</dd></div>
+                    </dl>
+                </article>
+                <article class="slide-card">
+                    <h3>內容頁方向</h3>
+                    <ul>
+                        <li>可使用章節概要與序號導覽。</li>
+                        <li>重點數字、組織架構、時間軸與成果表應有明確層級。</li>
+                        <li>品牌色作為重點與輔助，不以裝飾壓過內容。</li>
+                    </ul>
+                </article>
+            </div>
+        </section>
+
+        <section id="decision-generator" class="panel generator-panel" aria-labelledby="generator-title">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Decision Preview</p>
+                    <h2 id="generator-title">品牌應用產生器</h2>
+                    <p>選擇色卡、字體、Logo 與簡報模板後，產生一個同頁動態網頁預覽，協助比較未來使用方向。</p>
+                </div>
+            </div>
+            <form class="generator-form" id="brand-generator-form">
+                <div class="form-field">
+                    <label for="primaryColor">主色卡</label>
+                    <select id="primaryColor" name="primaryColor"></select>
+                </div>
+                <div class="form-field">
+                    <label for="accentColor">輔助色卡</label>
+                    <select id="accentColor" name="accentColor"></select>
+                </div>
+                <div class="form-field">
+                    <label for="fontChoice">字體</label>
+                    <select id="fontChoice" name="fontChoice">
+                        <option value="noto">思源黑體 Noto Sans TC</option>
+                        <option value="sho">翔鶴黑體</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="logoChoice">Logo 版本</label>
+                    <select id="logoChoice" name="logoChoice">
+                        <option value="standard">標準彩色</option>
+                        <option value="reverse">深色底反白</option>
+                        <option value="black">淺色底黑字</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="templateChoice">簡報模板</label>
+                    <select id="templateChoice" name="templateChoice">
+                        <option value="cover">封面式</option>
+                        <option value="agenda">章節概要式</option>
+                        <option value="metrics">重點數據式</option>
+                    </select>
+                </div>
+                <button class="generate-btn" type="submit">產生視覺化預覽</button>
+            </form>
+            <div class="generated-preview" id="generated-preview" aria-live="polite"></div>
+        </section>
+    </main>
+
+    <button id="back-to-top" type="button" aria-label="回到最上方">↑</button>
     <script src="./app.js"></script>
 </body>
 </html>
