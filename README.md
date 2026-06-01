@@ -95,15 +95,6 @@ TRTC_CFS/
 └── tableExample/           # 表格或版面範例
 ```
 
-## 文件索引
-
-`docs/` 目錄內包含本專案相關提案、維護與策略文件：
-
-- [Vibe Coding 提案範例](docs/vibe_coding_proposal_example.md)
-- [北捷品牌數位管家提案完整版](docs/vibe_coding_proposal_claude.md)
-- [Vibe Coding 提案 Word 文件](docs/vibe_coding_proposal.docx)
-- [維護手冊與未來規模化發展策略](docs/maintenance_and_scaling_strategy.md)
-
 ## 常見問題
 
 ### 需要安裝任何軟體嗎？
