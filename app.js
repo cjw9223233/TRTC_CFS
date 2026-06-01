@@ -70,7 +70,7 @@ const logoOptions = {
 const templateOptions = {
     cover: {
         label: '封面式',
-        eyebrow: 'The New Metro Taipei',
+        eyebrow: 'Metro Taipei',
         title: 'Our Lifestyle',
         detail: '適合活動首頁、封面簡報與品牌宣告。'
     },
