@@ -43,6 +43,7 @@
                 <a href="#font-guidelines" data-section="font-guidelines">字體規範</a>
                 <a href="#logo-rules" data-section="logo-rules">Logo 使用</a>
                 <a href="#presentation" data-section="presentation">簡報模板</a>
+                <a href="#layout-generator" data-section="layout-generator">版型產生器</a>
                 <a href="#decision-generator" data-section="decision-generator">品牌產生器</a>
             </div>
         </div>
@@ -213,6 +214,76 @@
                         <li>品牌色作為重點與輔助，不以裝飾壓過內容。</li>
                     </ul>
                 </article>
+            </div>
+        </section>
+
+        <!-- Layout Generator -->
+        <section id="layout-generator" class="panel layout-gen-panel reveal" aria-labelledby="layout-gen-title">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">UI Template Generator</p>
+                    <h2 id="layout-gen-title">資訊系統版型產生器</h2>
+                    <p>選擇情境與模組後按下「隨機產生」，即時生成符合北捷 CI 規範的完整資訊系統首頁版型。</p>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="lgen-controls">
+                <div class="lgen-control-group">
+                    <p class="lgen-group-label">主題情境</p>
+                    <div class="lgen-seed-row" id="lgen-seeds">
+                        <button class="lgen-seed active" data-seed="ops">捷運行控中心</button>
+                        <button class="lgen-seed" data-seed="station">車站服務台</button>
+                        <button class="lgen-seed" data-seed="maintenance">維修排程系統</button>
+                        <button class="lgen-seed" data-seed="passenger">旅客資訊系統</button>
+                        <button class="lgen-seed" data-seed="admin">行政管理後台</button>
+                    </div>
+                </div>
+                <div class="lgen-control-group">
+                    <p class="lgen-group-label">版型模組</p>
+                    <div class="lgen-module-row" id="lgen-modules">
+                        <label class="lgen-module-check"><input type="checkbox" value="nav" checked><span>導覽列</span></label>
+                        <label class="lgen-module-check"><input type="checkbox" value="dashboard" checked><span>儀表板</span></label>
+                        <label class="lgen-module-check"><input type="checkbox" value="tasks" checked><span>任務與通知</span></label>
+                        <label class="lgen-module-check"><input type="checkbox" value="actions" checked><span>快速操作</span></label>
+                        <label class="lgen-module-check"><input type="checkbox" value="footer" checked><span>頁尾資訊</span></label>
+                    </div>
+                </div>
+                <div class="lgen-control-group">
+                    <p class="lgen-group-label">版面結構</p>
+                    <div class="lgen-seed-row" id="lgen-layouts">
+                        <button class="lgen-seed active" data-layout="sidebar">側邊欄式</button>
+                        <button class="lgen-seed active" data-layout="topnav">頂部導覽式</button>
+                        <button class="lgen-seed active" data-layout="split">分割面板式</button>
+                    </div>
+                    <p class="lgen-layout-hint">點選的結構會加入隨機池，每次從中抽選一種</p>
+                </div>
+            </div>
+
+            <div class="lgen-actions">
+                <button class="lgen-generate-btn" id="lgen-generate-btn" type="button">
+                    <span class="lgen-dice">⚄</span> 隨機產生版型
+                </button>
+                <button class="lgen-copy-btn" id="lgen-copy-btn" type="button" style="display:none">
+                    複製 HTML
+                </button>
+                <span class="lgen-badge" id="lgen-badge" style="display:none"></span>
+            </div>
+
+            <!-- Preview -->
+            <div class="lgen-preview-wrap" id="lgen-preview-wrap">
+                <div class="lgen-empty" id="lgen-empty">
+                    <div class="lgen-empty-icon">⬡</div>
+                    <p>按下「隨機產生版型」即可在此預覽完整資訊系統首頁</p>
+                    <p class="lgen-empty-sub">支援側邊欄式、頂部導覽式、分割面板式三種佈局，每次結果皆不同</p>
+                </div>
+                <div class="lgen-browser" id="lgen-browser" style="display:none">
+                    <div class="lgen-browser-bar">
+                        <span class="lgen-dot r"></span><span class="lgen-dot y"></span><span class="lgen-dot g"></span>
+                        <span class="lgen-browser-url" id="lgen-browser-url">trtc-system.taipei.gov.tw</span>
+                    </div>
+                    <iframe id="lgen-frame" title="版型預覽" sandbox="allow-same-origin" scrolling="yes"></iframe>
+                </div>
             </div>
         </section>
 
