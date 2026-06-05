@@ -195,6 +195,17 @@ h3 {
     line-height: 1.7;
 }
 
+.site-warning-banner {
+            /* background-color: #FFF3CD; */
+            /* border-bottom: 1px solid #FFEBAA; */
+            color: #FC8561;
+            padding: 10px 0px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            /* text-align: center; */
+            letter-spacing: 0.05em;
+}
+
 /* ─── Quick Links (header nav) ───────────────────── */
 .quick-links {
     display: grid;
