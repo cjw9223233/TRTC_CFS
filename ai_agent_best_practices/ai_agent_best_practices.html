@@ -56,19 +56,62 @@
   .prog-bar-fill { background: linear-gradient(90deg, var(--blue), var(--mint)); border-radius:10px; height:10px; transition:width .5s ease; width:0%; }
 
   /* ── LAYOUT ── */
-  .container { max-width:820px; margin:0 auto; padding:28px 16px 60px; }
+  .learning-shell {
+    width:min(1180px, 100%);
+    margin:0 auto;
+    padding:28px 20px 64px;
+    display:grid;
+    grid-template-columns: 280px minmax(0, 820px);
+    gap:28px;
+    align-items:start;
+    justify-content:center;
+  }
+  .container { min-width:0; }
+  .course-sidebar { position:relative; }
+  .sidebar-sticky {
+    position:sticky;
+    top:86px;
+    background:rgba(255,255,255,.94);
+    border:1px solid var(--mint-lt);
+    border-radius:12px;
+    box-shadow:var(--card-shadow);
+    padding:18px;
+  }
+  .sidebar-kicker {
+    color:var(--muted);
+    font-size:.72rem;
+    font-weight:700;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+  }
+  .sidebar-title {
+    color:var(--navy);
+    font-size:1.05rem;
+    font-weight:800;
+    margin-top:4px;
+  }
+  .sidebar-status {
+    margin-top:8px;
+    color:var(--muted);
+    font-size:.82rem;
+    line-height:1.5;
+  }
 
   /* ── CHAPTER NAV ── */
-  .chapter-nav { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:28px; }
+  .chapter-nav { display:grid; gap:8px; margin-top:16px; }
   .chapter-btn {
-    padding:8px 16px; border-radius:20px; font-size:.82rem; font-weight:600; cursor:pointer;
+    width:100%; padding:10px 12px; border-radius:8px; font-size:.84rem; font-weight:700; cursor:pointer;
     border:2px solid var(--mint-lt); background:var(--white); color:var(--muted);
-    transition:all .25s; display:flex; align-items:center; gap:6px;
+    transition:all .25s; display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:10px;
+    text-align:left;
   }
-  .chapter-btn.active   { background:var(--blue); border-color:var(--blue); color:var(--white); }
-  .chapter-btn.done     { background:var(--mint-lt); border-color:var(--mint); color:var(--navy); }
+  .chapter-btn:hover:not(.locked) { border-color:var(--blue); background:#EBF6FF; color:var(--navy); }
+  .chapter-btn.active   { background:var(--blue); border-color:var(--blue); color:var(--white); box-shadow:0 8px 20px rgba(2,104,183,.18); }
+  .chapter-btn.done     { background:#F0FFFD; border-color:var(--mint); color:var(--navy); }
   .chapter-btn.locked   { opacity:.45; cursor:not-allowed; }
   .chapter-btn .dot { width:8px; height:8px; border-radius:50%; background:currentColor; }
+  .chapter-btn .course-step { font-size:.74rem; opacity:.78; white-space:nowrap; }
+  .chapter-btn .state-mark { justify-self:end; font-size:.78rem; font-weight:800; }
 
   /* ── CHAPTER PANEL ── */
   .chapter { display:none; animation: fadeUp .35s ease; }
@@ -181,10 +224,60 @@
   .drop-label { font-size:.78rem; color:var(--muted); margin-bottom:4px; }
 
   /* ── RESPONSIVE ── */
+  @media(max-width:860px) {
+    #progress-wrap { top:0; }
+    .learning-shell {
+      display:block;
+      padding:0 0 52px;
+    }
+    .course-sidebar {
+      position:sticky;
+      top:50px;
+      z-index:90;
+      background:var(--bg);
+      border-bottom:1px solid var(--mint-lt);
+      padding:10px 12px;
+    }
+    .sidebar-sticky {
+      position:static;
+      border-radius:0;
+      border:0;
+      box-shadow:none;
+      background:transparent;
+      padding:0;
+    }
+    .sidebar-kicker, .sidebar-title { display:none; }
+    .sidebar-status {
+      margin:0 0 8px;
+      padding:0 2px;
+      font-size:.76rem;
+    }
+    .chapter-nav {
+      display:flex;
+      gap:8px;
+      margin:0;
+      overflow-x:auto;
+      overscroll-behavior-x:contain;
+      scroll-snap-type:x proximity;
+      -webkit-overflow-scrolling:touch;
+      padding-bottom:4px;
+    }
+    .chapter-btn {
+      flex:0 0 auto;
+      width:auto;
+      min-width:138px;
+      grid-template-columns:auto 1fr;
+      scroll-snap-align:start;
+      white-space:nowrap;
+    }
+    .chapter-btn .state-mark { display:none; }
+    .container { padding:24px 16px 0; }
+  }
+
   @media(max-width:540px) {
     .card { padding:20px 16px; }
     header h1 { font-size:1.4rem; }
-    .chapter-btn { font-size:.75rem; padding:6px 12px; }
+    .chapter-btn { font-size:.75rem; padding:8px 10px; min-width:122px; }
   }
 </style>
 </head>
@@ -209,19 +302,28 @@
   <div class="prog-bar-bg"><div class="prog-bar-fill" id="prog-fill"></div></div>
 </div>
 
-<div class="container">
+<div class="learning-shell">
+  <aside class="course-sidebar" aria-label="課程章節">
+    <div class="sidebar-sticky">
+      <div class="sidebar-kicker">Course Map</div>
+      <div class="sidebar-title">章節導覽</div>
+      <div class="sidebar-status" id="sidebar-status">目前第 1 章，已完成 0 / 8</div>
 
   <!-- Chapter Nav -->
-  <div class="chapter-nav" id="chapNav">
-    <button class="chapter-btn active" data-ch="0" onclick="goChapter(0)"><span class="dot"></span>① 什麼是 Agent</button>
-    <button class="chapter-btn locked" data-ch="1" onclick="goChapter(1)"><span class="dot"></span>② 提示詞技巧</button>
-    <button class="chapter-btn locked" data-ch="2" onclick="goChapter(2)"><span class="dot"></span>③ 先規劃再行動</button>
-    <button class="chapter-btn locked" data-ch="3" onclick="goChapter(3)"><span class="dot"></span>④ AGENTS.md</button>
-    <button class="chapter-btn locked" data-ch="4" onclick="goChapter(4)"><span class="dot"></span>⑤ 驗證與審查</button>
-    <button class="chapter-btn locked" data-ch="5" onclick="goChapter(5)"><span class="dot"></span>⑥ MCP 連接外部工具</button>
-    <button class="chapter-btn locked" data-ch="6" onclick="goChapter(6)"><span class="dot"></span>⑦ Skills 技能包</button>
-    <button class="chapter-btn locked" data-ch="7" onclick="goChapter(7)"><span class="dot"></span>⑧ 自動化排程</button>
-  </div>
+      <nav class="chapter-nav" id="chapNav" aria-label="章節導覽">
+        <button type="button" class="chapter-btn active" data-ch="0" onclick="goChapter(0)" aria-current="true"><span class="dot"></span><span class="course-step">01 什麼是 Agent</span><span class="state-mark">現在</span></button>
+        <button type="button" class="chapter-btn locked" data-ch="1" onclick="goChapter(1)" aria-disabled="true"><span class="dot"></span><span class="course-step">02 提示詞技巧</span><span class="state-mark">鎖定</span></button>
+        <button type="button" class="chapter-btn locked" data-ch="2" onclick="goChapter(2)" aria-disabled="true"><span class="dot"></span><span class="course-step">03 先規劃再行動</span><span class="state-mark">鎖定</span></button>
+        <button type="button" class="chapter-btn locked" data-ch="3" onclick="goChapter(3)" aria-disabled="true"><span class="dot"></span><span class="course-step">04 AGENTS.md</span><span class="state-mark">鎖定</span></button>
+        <button type="button" class="chapter-btn locked" data-ch="4" onclick="goChapter(4)" aria-disabled="true"><span class="dot"></span><span class="course-step">05 驗證與審查</span><span class="state-mark">鎖定</span></button>
+        <button type="button" class="chapter-btn locked" data-ch="5" onclick="goChapter(5)" aria-disabled="true"><span class="dot"></span><span class="course-step">06 MCP 連接外部工具</span><span class="state-mark">鎖定</span></button>
+        <button type="button" class="chapter-btn locked" data-ch="6" onclick="goChapter(6)" aria-disabled="true"><span class="dot"></span><span class="course-step">07 Skills 技能包</span><span class="state-mark">鎖定</span></button>
+        <button type="button" class="chapter-btn locked" data-ch="7" onclick="goChapter(7)" aria-disabled="true"><span class="dot"></span><span class="course-step">08 自動化排程</span><span class="state-mark">鎖定</span></button>
+      </nav>
+    </div>
+  </aside>
+
+  <main class="container" id="course-content">
 
   <!-- ===================== CH0 ===================== -->
   <div class="chapter active" id="ch0">
@@ -710,7 +812,8 @@
     </div>
   </div>
 
-</div><!-- /container -->
+  </main>
+</div><!-- /learning-shell -->
 
 <script>
 // ── State ──
@@ -718,6 +821,46 @@ const TOTAL = 8;
 let completed  = new Array(TOTAL).fill(false);   // chapter done?
 let correctAns = new Array(TOTAL).fill(false);    // quiz correct?
 let currentCh  = 0;
+const chapterTitles = [
+  '什麼是 AI Agent',
+  '提示詞技巧',
+  '先規劃再行動',
+  'AGENTS.md',
+  '驗證與審查',
+  'MCP 連接外部工具',
+  'Skills 技能包',
+  '自動化排程'
+];
+
+function syncChapterNav() {
+  const done = completed.filter(Boolean).length;
+  const summaryVisible = document.getElementById('summary-panel').style.display === 'block';
+
+  document.querySelectorAll('.chapter-btn').forEach((btn, i)=>{
+    const isActive = i === currentCh && !summaryVisible;
+    const isDone = completed[i];
+    const isLocked = i > 0 && !completed[i-1] && !completed[i];
+    const marker = btn.querySelector('.state-mark');
+
+    btn.classList.toggle('active', isActive);
+    btn.classList.toggle('done', isDone);
+    btn.classList.toggle('locked', isLocked);
+    btn.toggleAttribute('aria-current', isActive);
+    btn.setAttribute('aria-disabled', isLocked ? 'true' : 'false');
+
+    if(marker) {
+      marker.textContent = isActive ? '現在' : isDone ? '完成' : isLocked ? '鎖定' : '可開始';
+    }
+  });
+
+  const status = document.getElementById('sidebar-status');
+  if(status) status.textContent = summaryVisible ? '課程完成，已完成 ' + done + ' / ' + TOTAL : '目前第 ' + (currentCh + 1) + ' 章，已完成 ' + done + ' / ' + TOTAL;
+
+  const activeBtn = document.querySelector('.chapter-btn.active');
+  if(activeBtn && window.matchMedia('(max-width: 860px)').matches) {
+    activeBtn.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+  }
+}
 
 // ── Helpers ──
 function goChapter(n) {
@@ -725,11 +868,10 @@ function goChapter(n) {
   if(btn.classList.contains('locked')) return;
 
   document.querySelectorAll('.chapter').forEach(c=>c.classList.remove('active'));
-  document.querySelectorAll('.chapter-btn').forEach(b=>b.classList.remove('active'));
 
   document.getElementById('ch'+n).classList.add('active');
-  btn.classList.add('active');
   currentCh = n;
+  syncChapterNav();
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
@@ -764,9 +906,6 @@ function nextChapter(from) {
 
   const nextBtn = document.querySelector(`[data-ch="${next}"]`);
   nextBtn.classList.remove('locked');
-  nextBtn.classList.add('done');   // mark prev
-  document.querySelector(`[data-ch="${from}"]`).classList.remove('active');
-  document.querySelector(`[data-ch="${from}"]`).classList.add('done');
 
   goChapter(next);
 }
@@ -775,6 +914,7 @@ function updateProgress() {
   const done = completed.filter(Boolean).length;
   document.getElementById('prog-text').textContent = done + ' / ' + TOTAL + ' 章節完成';
   document.getElementById('prog-fill').style.width = (done/TOTAL*100) + '%';
+  syncChapterNav();
 }
 
 function showSummary() {
@@ -784,6 +924,7 @@ function showSummary() {
   document.querySelectorAll('.chapter').forEach(c=>c.style.display='none');
   document.querySelectorAll('.chapter-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('summary-panel').style.display='block';
+  syncChapterNav();
 
   const score = correctAns.filter(Boolean).length;
   // ring
@@ -793,7 +934,7 @@ function showSummary() {
   document.getElementById('ringText').textContent = score+'/'+TOTAL;
 
   // checklist
-  const chapters = ['什麼是 AI Agent','Prompt 四要素','先規劃再行動','AGENTS.md 說明書','驗證與審查','MCP 連接外部工具','Skills 技能包','自動化排程'];
+  const chapters = chapterTitles;
   const list = document.getElementById('summary-list');
   list.innerHTML = '';
   chapters.forEach((c,i)=>{
@@ -830,6 +971,7 @@ function restartCourse() {
   updateProgress();
   goChapter(0);
 }
+syncChapterNav();
 </script>
 </body>
 </html>
