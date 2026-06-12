@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Agent 最佳實踐 — 新手互動教學</title>
+<style>
+  :root {
+    --navy:   #14598D;
+    --blue:   #0268B7;
+    --mint:   #5ECBC3;
+    --mint-lt:#B8EDE9;
+    --bg:     #F0F8FF;
+    --white:  #FFFFFF;
+    --text:   #1A2A3A;
+    --muted:  #5A7A90;
+    --warn:   #E8943A;
+    --success:#27AE6E;
+    --error:  #D64045;
+    --card-shadow: 0 4px 18px rgba(2,104,183,0.10);
+    --radius: 14px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Microsoft JhengHei', '微軟正黑體', 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 60%, var(--mint) 100%);
+    color: var(--white);
+    padding: 36px 24px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='1.5' fill='rgba(255,255,255,0.08)'/%3E%3C/svg%3E") repeat;
+  }
+  header h1 { font-size: clamp(1.5rem, 4vw, 2.4rem); font-weight: 700; position: relative; letter-spacing: 1px; }
+  header p  { font-size: .95rem; opacity:.85; margin-top:8px; position: relative; }
+  .badge-row { display:flex; gap:10px; justify-content:center; margin-top:14px; flex-wrap:wrap; position:relative; }
+  .badge { background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35); border-radius:20px; padding:4px 14px; font-size:.78rem; }
+
+  /* ── PROGRESS BAR ── */
+  #progress-wrap { background:var(--white); padding:14px 20px; border-bottom:2px solid var(--mint-lt); position:sticky; top:0; z-index:100; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+  .prog-label { font-size:.8rem; color:var(--muted); margin-bottom:6px; display:flex; justify-content:space-between; }
+  .prog-bar-bg { background:var(--mint-lt); border-radius:10px; height:10px; }
+  .prog-bar-fill { background: linear-gradient(90deg, var(--blue), var(--mint)); border-radius:10px; height:10px; transition:width .5s ease; width:0%; }
+
+  /* ── LAYOUT ── */
+  .container { max-width:820px; margin:0 auto; padding:28px 16px 60px; }
+
+  /* ── CHAPTER NAV ── */
+  .chapter-nav { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:28px; }
+  .chapter-btn {
+    padding:8px 16px; border-radius:20px; font-size:.82rem; font-weight:600; cursor:pointer;
+    border:2px solid var(--mint-lt); background:var(--white); color:var(--muted);
+    transition:all .25s; display:flex; align-items:center; gap:6px;
+  }
+  .chapter-btn.active   { background:var(--blue); border-color:var(--blue); color:var(--white); }
+  .chapter-btn.done     { background:var(--mint-lt); border-color:var(--mint); color:var(--navy); }
+  .chapter-btn.locked   { opacity:.45; cursor:not-allowed; }
+  .chapter-btn .dot { width:8px; height:8px; border-radius:50%; background:currentColor; }
+
+  /* ── CHAPTER PANEL ── */
+  .chapter { display:none; animation: fadeUp .35s ease; }
+  .chapter.active { display:block; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ── CARD ── */
+  .card {
+    background:var(--white); border-radius:var(--radius); padding:28px 26px;
+    box-shadow:var(--card-shadow); margin-bottom:22px;
+    border-left: 5px solid var(--blue);
+  }
+  .card.mint-accent { border-left-color: var(--mint); }
+  .card.warn-accent { border-left-color: var(--warn); }
+
+  .card h2 { font-size:1.2rem; color:var(--navy); margin-bottom:10px; display:flex; align-items:center; gap:10px; }
+  .card h2 .icon { font-size:1.4rem; }
+  .card p, .card li { font-size:.92rem; line-height:1.75; color:var(--text); }
+  .card ul, .card ol { padding-left:20px; margin-top:8px; }
+  .card li { margin-bottom:6px; }
+
+  /* concept box */
+  .concept-box {
+    background: linear-gradient(135deg, #EBF6FF, #E4FAF8);
+    border:1px solid var(--mint-lt); border-radius:10px; padding:16px 18px; margin:14px 0;
+  }
+  .concept-box strong { color: var(--navy); }
+
+  /* code-style highlight */
+  code {
+    background:#EEF6FF; border:1px solid #C4E0F7; border-radius:5px;
+    padding:2px 7px; font-family:'Courier New', monospace; font-size:.85rem; color:var(--blue);
+  }
+
+  /* tip box */
+  .tip {
+    background:#FFF8EE; border:1px solid #F5D8A8; border-radius:10px;
+    padding:12px 16px; margin:14px 0; font-size:.88rem;
+    display:flex; gap:10px; align-items:flex-start;
+  }
+  .tip .tip-icon { font-size:1.2rem; flex-shrink:0; }
+
+  /* ── QUIZ ── */
+  .quiz-section { margin-top:24px; }
+  .quiz-section h3 { font-size:1rem; color:var(--navy); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+  .quiz-q { background:var(--white); border:2px solid var(--mint-lt); border-radius:12px; padding:20px; margin-bottom:16px; }
+  .quiz-q p { font-size:.92rem; font-weight:600; margin-bottom:14px; line-height:1.6; }
+  .options { display:grid; gap:9px; }
+  .option-btn {
+    text-align:left; padding:11px 16px; border-radius:9px; border:2px solid #D4E8F5;
+    background:var(--bg); cursor:pointer; font-size:.88rem; transition:all .2s;
+    color:var(--text); display:flex; align-items:center; gap:10px;
+  }
+  .option-btn:hover:not(:disabled) { border-color:var(--blue); background:#EBF6FF; }
+  .option-btn.correct  { border-color:var(--success); background:#EDFAF3; color:#145A34; font-weight:600; }
+  .option-btn.wrong    { border-color:var(--error);   background:#FDEAEA; color:#7A1010; }
+  .option-btn:disabled { cursor:default; }
+  .option-btn .opt-marker { width:22px; height:22px; border-radius:50%; border:2px solid currentColor; display:inline-flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:700; flex-shrink:0; }
+  .feedback-msg { font-size:.85rem; margin-top:10px; padding:10px 14px; border-radius:8px; display:none; }
+  .feedback-msg.show { display:block; }
+  .feedback-msg.ok  { background:#EDFAF3; color:#145A34; border:1px solid #A3E4C2; }
+  .feedback-msg.err { background:#FDEAEA; color:#7A1010; border:1px solid #F3AAAA; }
+
+  /* ── NEXT BTN ── */
+  .next-btn {
+    display:none; width:100%; padding:14px; border-radius:10px; border:none;
+    background: linear-gradient(90deg, var(--blue), var(--mint));
+    color:var(--white); font-size:1rem; font-weight:700; cursor:pointer;
+    margin-top:20px; letter-spacing:.5px; transition:opacity .2s; box-shadow:0 4px 14px rgba(2,104,183,.25);
+  }
+  .next-btn:hover { opacity:.88; }
+  .next-btn.visible { display:block; }
+
+  /* ── SUMMARY ── */
+  #summary { text-align:center; padding:20px 0; }
+  #summary .trophy { font-size:5rem; margin-bottom:10px; }
+  #summary h2 { font-size:1.6rem; color:var(--navy); margin-bottom:8px; }
+  #summary p  { color:var(--muted); font-size:.95rem; }
+  .score-ring { width:120px; height:120px; margin:22px auto; position:relative; }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring .ring-bg   { fill:none; stroke:var(--mint-lt); stroke-width:10; }
+  .score-ring .ring-fill { fill:none; stroke:var(--mint);    stroke-width:10; stroke-linecap:round; stroke-dasharray:301.6; stroke-dashoffset:301.6; transition:stroke-dashoffset 1s ease; }
+  .score-ring .ring-text { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:700; color:var(--navy); }
+  .checklist { text-align:left; max-width:420px; margin:18px auto; }
+  .checklist li { list-style:none; padding:8px 0; border-bottom:1px solid var(--mint-lt); font-size:.9rem; display:flex; gap:10px; align-items:center; }
+  .checklist li::before { content:'✓'; color:var(--mint); font-weight:700; }
+  .restart-btn { margin-top:22px; padding:12px 32px; border-radius:10px; border:2px solid var(--blue); background:transparent; color:var(--blue); font-size:.95rem; font-weight:600; cursor:pointer; transition:all .2s; }
+  .restart-btn:hover { background:var(--blue); color:var(--white); }
+
+  /* ── STEPMAP ── */
+  .stepmap { display:flex; flex-direction:column; gap:0; margin:16px 0; }
+  .step-item { display:flex; gap:16px; align-items:flex-start; padding-bottom:20px; position:relative; }
+  .step-item:not(:last-child)::before { content:''; position:absolute; left:18px; top:40px; width:2px; height:calc(100% - 20px); background:var(--mint-lt); }
+  .step-circle { width:36px; height:36px; border-radius:50%; background:var(--blue); color:var(--white); font-weight:700; font-size:.9rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .step-body strong { color:var(--navy); font-size:.95rem; }
+  .step-body p { font-size:.85rem; color:var(--muted); margin-top:4px; line-height:1.6; }
+
+  /* ── DRAG DROP ── */
+  .drag-area { border:2px dashed var(--mint); border-radius:12px; padding:18px; min-height:60px; background:#F7FFFE; margin:10px 0; }
+  .drag-area.over { background:var(--mint-lt); }
+  .drag-tag {
+    display:inline-block; padding:7px 14px; border-radius:20px; background:var(--white); border:2px solid var(--mint);
+    font-size:.83rem; cursor:grab; margin:5px; color:var(--navy); font-weight:600; user-select:none;
+    transition: box-shadow .15s;
+  }
+  .drag-tag:active { cursor:grabbing; }
+  .drag-tag.placed { opacity:.4; pointer-events:none; }
+  .drop-zone { border:2px dashed #CBD9E8; border-radius:8px; min-height:42px; padding:6px; margin-top:8px; background:#F8FBFF; }
+  .drop-zone.has-item { border-color:var(--mint); background:var(--mint-lt); }
+  .drop-label { font-size:.78rem; color:var(--muted); margin-bottom:4px; }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:540px) {
+    .card { padding:20px 16px; }
+    header h1 { font-size:1.4rem; }
+    .chapter-btn { font-size:.75rem; padding:6px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>AI Agent 最佳實踐</h1>
+  <p>新手互動教學 · 從零開始掌握 Codex / AI Agent 核心方法</p>
+  <!-- <div class="badge-row">
+    <span class="badge">📚 8 個章節</span>
+    <span class="badge">🎯 互動測驗</span>
+    <span class="badge">🏆 完成獎勵</span>
+    <span class="badge">🦞 繁體中文</span>
+  </div> -->
+</header>
+
+<div id="progress-wrap">
+  <div class="prog-label">
+    <span>學習進度</span>
+    <span id="prog-text">0 / 8 章節完成</span>
+  </div>
+  <div class="prog-bar-bg"><div class="prog-bar-fill" id="prog-fill"></div></div>
+</div>
+
+<div class="container">
+
+  <!-- Chapter Nav -->
+  <div class="chapter-nav" id="chapNav">
+    <button class="chapter-btn active" data-ch="0" onclick="goChapter(0)"><span class="dot"></span>① 什麼是 Agent</button>
+    <button class="chapter-btn locked" data-ch="1" onclick="goChapter(1)"><span class="dot"></span>② 提示詞技巧</button>
+    <button class="chapter-btn locked" data-ch="2" onclick="goChapter(2)"><span class="dot"></span>③ 先規劃再行動</button>
+    <button class="chapter-btn locked" data-ch="3" onclick="goChapter(3)"><span class="dot"></span>④ AGENTS.md</button>
+    <button class="chapter-btn locked" data-ch="4" onclick="goChapter(4)"><span class="dot"></span>⑤ 驗證與審查</button>
+    <button class="chapter-btn locked" data-ch="5" onclick="goChapter(5)"><span class="dot"></span>⑥ MCP 連接外部工具</button>
+    <button class="chapter-btn locked" data-ch="6" onclick="goChapter(6)"><span class="dot"></span>⑦ Skills 技能包</button>
+    <button class="chapter-btn locked" data-ch="7" onclick="goChapter(7)"><span class="dot"></span>⑧ 自動化排程</button>
+  </div>
+
+  <!-- ===================== CH0 ===================== -->
+  <div class="chapter active" id="ch0">
+    <div class="card">
+      <h2><span class="icon">🤖</span>什麼是 AI Agent？</h2>
+      <p>AI Agent（AI 代理人）是一種可以<strong>自動執行多步驟任務</strong>的 AI 程式。它不只是回答問題，還能主動讀取檔案、執行指令、呼叫工具，完成你交辦的完整工作。</p>
+      <div class="concept-box">
+        <strong>🔑 核心概念</strong><br>
+        一般 AI 聊天：你問一句 → AI 答一句<br><br>
+        <strong>AI Agent：</strong>你說「幫我把這份報告整理成投影片」→ Agent 自動讀取報告、分析結構、生成投影片、回報結果，全程自動完成。
+      </div>
+      <p>OpenAI 的 <strong>Codex</strong> 是目前最強大的 AI 編程代理，它能在 CLI（命令列）、IDE 編輯器外掛、或 Web App 中幫你自動寫程式、修 bug、跑測試。</p>
+
+      <div class="stepmap">
+        <div class="step-item">
+          <div class="step-circle">1</div>
+          <div class="step-body"><strong>你給任務（Prompt）</strong><p>用自然語言描述你想做什麼</p></div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle">2</div>
+          <div class="step-body"><strong>Agent 規劃步驟</strong><p>Agent 分析任務、找出需要的工具和資訊</p></div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle">3</div>
+          <div class="step-body"><strong>自動執行</strong><p>讀檔、呼叫 API、執行指令、修改程式碼</p></div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle" style="background:var(--mint)">4</div>
+          <div class="step-body"><strong>回報結果</strong><p>完成任務，讓你審查確認</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="quiz-section">
+      <h3>🎯 快速測驗：確認你理解了</h3>
+      <div class="quiz-q" id="q0">
+        <p>下列哪一個描述最符合「AI Agent」與「一般 AI 聊天」的差異？</p>
+        <div class="options">
+          <button class="option-btn" onclick="answerQ(0,0,false,'AI Agent 其實就是更強的 AI 聊天，兩者沒有本質區別喔！關鍵是 Agent 能自主執行多步驟任務。')">
+            <span class="opt-marker">A</span>AI Agent 只是回答更長的答案
+          </button>
+          <button class="option-btn" onclick="answerQ(0,1,true,'✅ 完全正確！Agent 的核心是「自主多步驟執行」，它能主動呼叫工具、讀寫檔案完成完整任務。')">
+            <span class="opt-marker">B</span>AI Agent 能自主執行多步驟任務，主動使用工具完成工作
+          </button>
+          <button class="option-btn" onclick="answerQ(0,2,false,'速度不是核心差異。關鍵在於 Agent 能「主動行動」，不只是回答。')">
+            <span class="opt-marker">C</span>AI Agent 回答速度比一般聊天快很多
+          </button>
+        </div>
+        <div class="feedback-msg" id="fb0"></div>
+      </div>
+    </div>
+    <button class="next-btn" id="next0" onclick="nextChapter(0)">下一章：提示詞技巧 →</button>
+  </div>
+
+  <!-- ===================== CH1 ===================== -->
+  <div class="chapter" id="ch1">
+    <div class="card">
+      <h2><span class="icon">✍️</span>寫出好的提示詞（Prompt）</h2>
+      <p>提示詞不需要完美，但越清楚，Agent 的結果越可靠。OpenAI 建議一個好的 Prompt 包含四個要素：</p>
+
+      <div class="concept-box">
+        <strong>📋 Prompt 四要素</strong>
+        <ul style="margin-top:8px; list-style:none; padding:0;">
+          <li style="padding:7px 0; border-bottom:1px solid #C8EDF0">🎯 <strong>Goal（目標）</strong>：你想改什麼或做什麼？</li>
+          <li style="padding:7px 0; border-bottom:1px solid #C8EDF0">📁 <strong>Context（脈絡）</strong>：哪些檔案、錯誤訊息、範例是相關的？</li>
+          <li style="padding:7px 0; border-bottom:1px solid #C8EDF0">⚙️ <strong>Constraints（限制）</strong>：有哪些規範、架構、安全要求？</li>
+          <li style="padding:7px 0;">✅ <strong>Done When（完成條件）</strong>：什麼狀態叫做「完成」？</li>
+        </ul>
+      </div>
+
+      <p>你也可以根據任務難度調整 Agent 的「推理等級」：</p>
+      <ul>
+        <li><code>Low</code> — 快速、範圍清楚的小任務</li>
+        <li><code>Medium / High</code> — 複雜的修改或 debug</li>
+        <li><code>Extra High</code> — 長時間、需要深度推理的任務</li>
+      </ul>
+
+      <div class="tip">
+        <span class="tip-icon">💡</span>
+        <span>在 Codex App 裡，你可以用<strong>語音輸入</strong>來口述任務，不用打字！這對描述複雜需求特別方便。</span>
+      </div>
+    </div>
+
+    <div class="card mint-accent">
+      <h2><span class="icon">📝</span>Prompt 範例對比</h2>
+      <p style="font-weight:600; color:var(--error)">❌ 不好的 Prompt：</p>
+      <div style="background:#FFF0F0; border-radius:8px; padding:12px; margin:8px 0; font-size:.88rem; border:1px solid #F3AAAA;">幫我修好那個 bug</div>
+      <p style="font-weight:600; color:var(--success); margin-top:14px">✅ 好的 Prompt：</p>
+      <div style="background:#EDFAF3; border-radius:8px; padding:12px; margin:8px 0; font-size:.88rem; border:1px solid #A3E4C2;">
+        <strong>目標：</strong>修正用戶登入失敗的 bug<br>
+        <strong>脈絡：</strong>錯誤出現在 <code>auth/login.py</code> 第 42 行，錯誤訊息為 "KeyError: token"<br>
+        <strong>限制：</strong>不可修改資料庫 schema，需維持 Python 3.9 相容性<br>
+        <strong>完成條件：</strong>所有登入相關的單元測試通過
+      </div>
+    </div>
+
+    <div class="quiz-section">
+      <h3>🎯 快速測驗</h3>
+      <div class="quiz-q" id="q1">
+        <p>一個好的 Prompt 應包含哪四個要素？（按正確順序排列）</p>
+        <div class="options">
+          <button class="option-btn" onclick="answerQ(1,0,false,'這些是寫程式用的工具，不是 Prompt 要素。正確的四要素是：目標、脈絡、限制、完成條件。')">
+            <span class="opt-marker">A</span>函數名稱、變數宣告、回傳值、錯誤處理
+          </button>
+          <button class="option-btn" onclick="answerQ(1,1,true,'✅ 完美！Goal + Context + Constraints + Done When 就是 OpenAI 官方建議的 Prompt 四要素。')">
+            <span class="opt-marker">B</span>目標（Goal）、脈絡（Context）、限制（Constraints）、完成條件（Done When）
+          </button>
+          <button class="option-btn" onclick="answerQ(1,2,false,'這些是專案管理的要素，不是 Prompt 的四要素喔！')">
+            <span class="opt-marker">C</span>時程、成本、品質、範圍
+          </button>
+        </div>
+        <div class="feedback-msg" id="fb1"></div>
+      </div>
+    </div>
+    <button class="next-btn" id="next1" onclick="nextChapter(1)">下一章：先規劃再行動 →</button>
+  </div>
+
+  <!-- ===================== CH2 ===================== -->
+  <div class="chapter" id="ch2">
+    <div class="card">
+      <h2><span class="icon">🗺️</span>先規劃，再行動（Plan First）</h2>
+      <p>面對複雜或模糊的任務，<strong>不要急著讓 Agent 直接開始做</strong>，而是先讓它「規劃」再「執行」。這樣可以大幅降低走錯方向的風險。</p>
+
+      <div class="concept-box">
+        <strong>🔑 為什麼要先規劃？</strong><br>
+        想像你要蓋一棟房子，你不會直接叫工人開始動工，而是先看設計圖、確認需求、再拿到施工許可。AI Agent 也一樣 — 複雜任務需要先形成計畫。
+      </div>
+
+      <p>OpenAI 提供三種規劃方式：</p>
+
+      <div class="stepmap">
+        <div class="step-item">
+          <div class="step-circle" style="background:var(--warn)">1</div>
+          <div class="step-body">
+            <strong>Plan Mode（規劃模式）</strong>
+            <p>最簡單的方式。輸入 <code>/plan</code> 或按 <code>Shift+Tab</code>，Agent 會先提問、整理計畫，再開始寫程式。</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle" style="background:var(--warn)">2</div>
+          <div class="step-body">
+            <strong>請 Agent 先採訪你</strong>
+            <p>告訴 Agent：「請先問我問題，挑戰我的假設，把模糊的想法變成清楚的需求，再開始寫程式。」</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle" style="background:var(--mint); color:var(--navy)">3</div>
+          <div class="step-body">
+            <strong>PLANS.md 執行計畫模板</strong>
+            <p>進階用法：建立一份 PLANS.md 文件，定義多步驟任務的標準執行流程。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tip">
+        <span class="tip-icon">⚠️</span>
+        <span><strong>新手常犯的錯誤：</strong>跳過規劃步驟，直接叫 Agent 執行複雜任務。結果是 Agent 完成了很多工作，但方向是錯的，你要花更多時間修正。</span>
+      </div>
+    </div>
+
+    <div class="quiz-section">
+      <h3>🎯 快速測驗</h3>
+      <div class="quiz-q" id="q2">
+        <p>當你要請 AI Agent 完成一個「複雜、模糊的任務」時，最佳做法是什麼？</p>
+        <div class="options">
+          <button class="option-btn" onclick="answerQ(2,0,false,'直接執行可能走錯方向，後來要修正更耗時。複雜任務建議先規劃。')">
+            <span class="opt-marker">A</span>直接給任務讓 Agent 開始執行，反正可以事後修正
+          </button>
+          <button class="option-btn" onclick="answerQ(2,1,false,'一直給更多指令反而會讓 Agent 混亂。規劃比填充資訊更重要。')">
+            <span class="opt-marker">B</span>一次給越多細節越好，讓 Agent 沒有疑問
+          </button>
+          <button class="option-btn" onclick="answerQ(2,2,true,'✅ 正確！使用 /plan 或請 Agent 先規劃，確認方向再執行，可以大幅減少返工。')">
+            <span class="opt-marker">C</span>使用 /plan 模式，讓 Agent 先規劃、確認方向，再開始執行
+          </button>
+        </div>
+        <div class="feedback-msg" id="fb2"></div>
+      </div>
+    </div>
+    <button class="next-btn" id="next2" onclick="nextChapter(2)">下一章：AGENTS.md →</button>
+  </div>
+
+  <!-- ===================== CH3 ===================== -->
+  <div class="chapter" id="ch3">
+    <div class="card">
+      <h2><span class="icon">📄</span>AGENTS.md — Agent 的說明書</h2>
+      <p><code>AGENTS.md</code> 就像是你給 Agent 的「工作手冊」，讓它每次開始工作時都能自動讀取你的期望與規範，不需要每次重複說明。</p>
+
+      <div class="concept-box">
+        <strong>🔑 生活比喻</strong><br>
+        想像你請了一位新工讀生。你可以每天當面交代他規則，也可以給他一本「公司員工手冊」讓他自行閱讀。<code>AGENTS.md</code> 就是那本手冊 — 一次寫好，Agent 每次都會遵守。
+      </div>
+
+      <p>一份好的 AGENTS.md 通常包含：</p>
+      <ul>
+        <li>📁 <strong>專案結構</strong>：重要資料夾和檔案的說明</li>
+        <li>🚀 <strong>如何執行專案</strong>：啟動、測試、建置的指令</li>
+        <li>📏 <strong>程式規範</strong>：命名慣例、程式風格</li>
+        <li>🚫 <strong>禁止事項</strong>：什麼事 Agent 不可以做</li>
+        <li>✅ <strong>完成定義</strong>：什麼叫做一個任務「完成了」</li>
+      </ul>
+
+      <div class="tip">
+        <span class="tip-icon">⚡</span>
+        <span>使用 CLI 指令 <code>/init</code> 可以快速建立一份基礎 AGENTS.md。建立後再根據你的實際需求修改。</span>
+      </div>
+
+      <p style="margin-top:14px">AGENTS.md 可以放在多個層級：</p>
+      <ul>
+        <li><code>~/.codex/AGENTS.md</code> — 你的個人預設（所有專案都適用）</li>
+        <li>專案根目錄 — 整個專案的規範</li>
+        <li>子資料夾 — 局部的特殊規則（優先度最高）</li>
+      </ul>
+    </div>
+
+    <div class="quiz-section">
+      <h3>🎯 快速測驗</h3>
+      <div class="quiz-q" id="q3">
+        <p>關於 AGENTS.md，以下哪個說法是正確的？</p>
+        <div class="options">
+          <button class="option-btn" onclick="answerQ(3,0,false,'AGENTS.md 不是程式碼，它是給 Agent 讀取的說明文件，讓 Agent 了解如何在這個專案工作。')">
+            <span class="opt-marker">A</span>AGENTS.md 是一種程式語言，需要特殊語法才能讓 Agent 理解
+          </button>
+          <button class="option-btn" onclick="answerQ(3,1,false,'AGENTS.md 會自動載入到 Agent 的脈絡中，不需要每次手動貼上。')">
+            <span class="opt-marker">B</span>每次使用 Agent 都需要手動把 AGENTS.md 的內容複製貼上到 Prompt
+          </button>
+          <button class="option-btn" onclick="answerQ(3,2,true,'✅ 正確！AGENTS.md 會自動載入，且可以放在不同層級，越接近當前目錄的檔案優先度越高。')">
+            <span class="opt-marker">C</span>AGENTS.md 自動載入到 Agent 脈絡，可放在不同層級，越局部的規則優先度越高
+          </button>
+        </div>
+        <div class="feedback-msg" id="fb3"></div>
+      </div>
+    </div>
+    <button class="next-btn" id="next3" onclick="nextChapter(3)">下一章：驗證與審查 →</button>
+  </div>
+
+  <!-- ===================== CH4 ===================== -->
+  <div class="chapter" id="ch4">
+    <div class="card">
+      <h2><span class="icon">🔍</span>驗證與審查 — 不要盲目接受</h2>
+      <p>Agent 產出程式碼只是開始，<strong>要求它自我驗證和審查</strong>才是完整的流程。一個好的 AI Agent 工作流程不只是「產生程式碼」，還包括：</p>
+
+      <div class="concept-box">
+        <strong>完整的 Agent 工作迴圈</strong><br><br>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:.88rem;">
+          <span style="background:var(--blue); color:#fff; border-radius:6px; padding:4px 10px;">撰寫程式碼</span>
+          <span>→</span>
+          <span style="background:var(--mint); color:var(--navy); border-radius:6px; padding:4px 10px;">撰寫 / 更新測試</span>
+          <span>→</span>
+          <span style="background:var(--navy); color:#fff; border-radius:6px; padding:4px 10px;">執行測試</span>
+          <span>→</span>
+          <span style="background:var(--warn); color:#fff; border-radius:6px; padding:4px 10px;">程式碼審查</span>
+          <span>→</span>
+          <span style="background:var(--success); color:#fff; border-radius:6px; padding:4px 10px;">確認完成</span>
+        </div>
+      </div>
+
+      <p style="margin-top:14px">你可以在 <strong>AGENTS.md</strong> 或 Prompt 中指定 Agent 必須：</p>
+      <ul>
+        <li>✅ 為修改的功能撰寫或更新測試</li>
+        <li>✅ 執行完整的測試套件</li>
+        <li>✅ 通過 lint、型別檢查、格式化</li>
+        <li>✅ 最終行為符合任務要求</li>
+        <li>✅ 審查 diff，找出可能的 bug 或回歸問題</li>
+      </ul>
+
+      <div class="tip">
+        <span class="tip-icon">🛠️</span>
+        <span>在 Codex App 使用 <code>/review</code> 指令，可以讓 Agent 審查程式碼變更 — 可以針對 PR、未提交的修改，或特定 commit 進行審查。</span>
+      </div>
+
+      <div class="tip">
+        <span class="tip-icon">🏢</span>
+        <span>OpenAI 內部所有的 PR（Pull Request）都由 Codex 進行 100% 的程式碼審查！你也可以在 GitHub 整合中啟用這個功能。</span>
+      </div>
+    </div>
+
+    <div class="quiz-section">
+      <h3>🎯 快速測驗</h3>
+      <div class="quiz-q" id="q4">
+        <p>Agent 完成程式碼修改後，下一步最應該做什麼？</p>
+        <div class="options">
+          <button class="option-btn" onclick="answerQ(4,0,false,'直接部署太冒險了！應該先驗證、測試，確保程式碼品質。')">
+            <span class="opt-marker">A</span>直接部署到正式環境，反正 AI 不會犯錯
+          </button>
+          <button class="option-btn" onclick="answerQ(4,1,true,'✅ 正確！要求 Agent 跑測試、做程式碼審查，確認品質後才算完成。這才是完整的工作迴圈。')">
+            <span class="opt-marker">B</span>要求 Agent 執行測試、進行程式碼審查，確認沒有 bug 再接受
+          </button>
+          <button class="option-btn" onclick="answerQ(4,2,false,'直接接受沒有驗證過的程式碼，風險很高。即使是 AI 也可能有錯誤。')">
+            <span class="opt-marker">C</span>直接接受 Agent 的輸出，不需要額外驗證
+          </button>
+        </div>
+        <div class="feedback-msg" id="fb4"></div>
+      </div>
+    </div>
+    <button class="next-btn" id="next4" onclick="nextChapter(4)">下一章：MCP 連接外部工具 →</button>
+  </div>
+
+  <!-- ===================== CH5 ===================== -->
+  <div class="chapter" id="ch5">
+    <div class="card">
+      <h2><span class="icon">🔗</span>MCP — 連接外部世界</h2>
+      <p><strong>MCP（Model Context Protocol）</strong> 是一個開放標準，讓 AI Agent 能連接到外部工具和系統，例如你的資料庫、Slack、GitHub、Jira 等等。</p>
+
+      <div class="concept-box">
+        <strong>🔑 生活比喻</strong><br>
+        MCP 就像是手機的 App Store — 你可以為你的 AI Agent 安裝「插件」，讓它能存取更多外部資訊和工具，而不只是靠你貼上的文字。
+      </div>
+
+      <p>什麼時候應該使用 MCP？</p>
+      <ul>
+        <li>📦 需要的資訊存在於<strong>程式庫之外</strong>（例如 Jira ticket、資料庫）</li>
+        <li>🔄 資料<strong>經常變動</strong>（例如每天的報告、即時數據）</li>
+        <li>🔧 需要 Agent <strong>呼叫工具</strong>，而不是靠貼上的指令</li>
+        <li>👥 需要跨用戶、跨專案的<strong>可重複整合</strong></li>
+      </ul>
+
+      <div class="tip">
+        <span class="tip-icon">⚠️</span>
+        <span><strong>新手建議：</strong>不要一次接上所有工具！先從 1-2 個最常用的工具開始，找到真正能省時間的整合點，再慢慢擴展。</span>
+      </div>
+
+      <p style="margin-top:14px">常見的 MCP 應用場景：</p>
+      <ul>
+        <li>🐛 讀取 GitHub Issues / Jira Tickets 來修 bug</li>
+        <li>📊 連接資料庫查詢即時數據</li>
+        <li>💬 整合 Slack 發送通知</li>
+        <li>📁 存取 Google Drive 的文件</li>
+      </ul>
+    </div>
+
+    <div class="quiz-section">
+      <h3>🎯 快速測驗</h3>
+      <div class="quiz-q" id="q5">
+        <p>你想讓 AI Agent 自動讀取最新的 Jira Bug 票，幫你修復程式碼。這種情境最適合使用什麼技術？</p>
+        <div class="options">
+          <button class="option-btn" onclick="answerQ(5,0,false,'每次複製貼上效率很低，而且會有遺漏或過時資訊的問題。MCP 才是正解。')">
+            <span class="opt-marker">A</span>每次手動複製 Jira 票的內容貼到 Prompt 裡
+          </button>
+          <button class="option-btn" onclick="answerQ(5,1,true,'✅ 完全正確！MCP 就是為了這種「需要連接外部系統」的場景而生，可以讓 Agent 直接存取 Jira 資料。')">
+            <span class="opt-marker">B</span>設定 MCP 連接 Jira，讓 Agent 直接存取最新 ticket 資料
+          </button>
+          <button class="option-btn" onclick="answerQ(5,2,false,'截圖無法被 Agent 自動解析和操作，MCP 是更有效的方式。')">
+            <span class="opt-marker">C</span>截圖 Jira 頁面，請 Agent 辨識截圖內容
+          </button>
+        </div>
+        <div class="feedback-msg" id="fb5"></div>
+      </div>
+    </div>
+    <button class="next-btn" id="next5" onclick="nextChapter(5)">下一章：Skills 技能包 →</button>
+  </div>
+
+  <!-- ===================== CH6 ===================== -->
+  <div class="chapter" id="ch6">
+    <div class="card">
+      <h2><span class="icon">⚡</span>Skills — 打包你的工作方法</h2>
+      <p>當你發現自己<strong>重複使用同樣的 Prompt，或反覆糾正同樣的問題</strong>時，就是時候把它打包成一個 <strong>Skill（技能包）</strong>了。</p>
+
+      <div class="concept-box">
+        <strong>🔑 什麼是 Skill？</strong><br>
+        Skill 是一個 <code>SKILL.md</code> 文件，它定義了一個可重複使用的工作方法 — 包含說明、輸入輸出格式、使用時機。Agent 讀取後就能按照這個方法一致地執行任務。
+      </div>
+
+      <p>哪些工作適合做成 Skill？</p>
+      <ul>
+        <li>📋 <strong>Log 分析</strong>：每天早上分析系統錯誤日誌</li>
+        <li>📝 <strong>Release Notes 撰寫</strong>：依照固定格式整理版本更新說明</li>
+        <li>🔍 <strong>Code Review</strong>：按照團隊規範審查 PR</li>
+        <li>📊 <strong>每週進度摘要</strong>：整理 Jira / GitHub 本週完成事項</li>
+        <li>🐛 <strong>標準除錯流程</strong>：按步驟診斷常見問題類型</li>
+      </ul>
+
+      <div class="tip">
+        <span class="tip-icon">🚀</span>
+        <span>可以使用內建的 <code>$skill-creator</code> Skill 來幫你快速建立新的 Skill！第一個版本先放在本地測試，穩定後再分享給團隊。</span>
+      </div>
+
+      <p style="margin-top:14px"><strong>Skill 存放位置：</strong></p>
+      <ul>
+        <li><code>$HOME/.agents/skills</code> — 你的個人技能（私有）</li>
+        <li>專案 <code>.agents/skills</code> — 團隊共用技能（可放進 Git）</li>
+      </ul>
+    </div>
+
+    <div class="quiz-section">
+      <h3>🎯 快速測驗</h3>
+      <div class="quiz-q" id="q6">
+        <p>你發現自己每週都要對 Agent 說「依照我們的格式幫我寫這週的 Release Notes」，而且每次都要重新說明格式。最好的解決方案是什麼？</p>
+        <div class="options">
+          <button class="option-btn" onclick="answerQ(6,0,false,'記住 Prompt 不能自動執行，而且每次還是要重新輸入。做成 Skill 才能真正節省時間。')">
+            <span class="opt-marker">A</span>把常用 Prompt 存在記事本，每次複製貼上
+          </button>
+          <button class="option-btn" onclick="answerQ(6,1,true,'✅ 完全正確！這正是 Skill 的使用場景 — 重複的工作方法，打包成 SKILL.md，一次定義，長期受益。')">
+            <span class="opt-marker">B</span>建立一個「Release Notes 撰寫 Skill」，定義格式規範，讓 Agent 每次都一致執行
+          </button>
+          <button class="option-btn" onclick="answerQ(6,2,false,'每次重新訓練 Agent 效率很低，而且 Codex 不是這樣運作的。Skill 是更好的解法。')">
+            <span class="opt-marker">C</span>每次都先花 10 分鐘重新訓練 Agent，讓它記住格式
+          </button>
+        </div>
+        <div class="feedback-msg" id="fb6"></div>
+      </div>
+    </div>
+    <button class="next-btn" id="next6" onclick="nextChapter(6)">下一章：自動化排程 →</button>
+  </div>
+
+  <!-- ===================== CH7 ===================== -->
+  <div class="chapter" id="ch7">
+    <div class="card">
+      <h2><span class="icon">⏰</span>自動化 — 讓 Agent 在背景工作</h2>
+      <p>當一個工作流程已經<strong>穩定且可預測</strong>時，就可以設定 <strong>Automation（自動化排程）</strong>，讓 Agent 在背景定時執行，完全不需要你手動觸發。</p>
+
+      <div class="concept-box">
+        <strong>🔑 Skill vs Automation 的關係</strong><br>
+        <strong>Skill 定義「怎麼做」</strong>（方法）<br>
+        <strong>Automation 定義「何時做」</strong>（排程）<br><br>
+        一個規則：<strong>Skill 先做好，再設 Automation。</strong>如果工作流程還不穩定，就不要急著自動化！
+      </div>
+
+      <p>哪些工作適合設定 Automation？</p>
+      <ul>
+        <li>🌅 <strong>每天早上</strong>：摘要昨天的 commits，生成 standup 報告</li>
+        <li>🔎 <strong>定期掃描</strong>：每週檢查潛在 bug 或安全漏洞</li>
+        <li>📋 <strong>每次 PR</strong>：自動進行程式碼審查</li>
+        <li>🚨 <strong>CI 失敗時</strong>：分析錯誤原因，提供修復建議</li>
+        <li>📰 <strong>每版本</strong>：自動產生 Release Notes 草稿</li>
+      </ul>
+
+      <div class="tip">
+        <span class="tip-icon">💡</span>
+        <span>Automation 不只是執行任務，也適合用來「反省和維護」— 例如：每週回顧 Agent 的工作記錄，找出重複出現的問題，更新 AGENTS.md 或 Skill。</span>
+      </div>
+    </div>
+
+    <!-- Final Quiz -->
+    <div class="quiz-section">
+      <h3>🎯 最終測驗 — 綜合判斷</h3>
+      <div class="quiz-q" id="q7">
+        <p>你的團隊每天早上花 30 分鐘整理「昨日 Bug 修復摘要」報告，格式固定。以下哪個 AI Agent 最佳實踐的組合最適合解決這個問題？</p>
+        <div class="options">
+          <button class="option-btn" onclick="answerQ(7,0,false,'只用 Plan Mode 只是用來規劃任務，不能解決「重複且需定時執行」的問題。')">
+            <span class="opt-marker">A</span>每天手動使用 Plan Mode，口述任務要求
+          </button>
+          <button class="option-btn" onclick="answerQ(7,1,false,'MCP + Automation 是對的方向，但少了 Skill 來定義固定格式，結果可能每次不一致。')">
+            <span class="opt-marker">B</span>接 MCP 連結 Git 記錄，然後直接設 Automation 排程
+          </button>
+          <button class="option-btn" onclick="answerQ(7,2,true,'✅ 完美答案！MCP 取得資料→ Skill 定義報告格式 → Automation 定時觸發，這三層架構最完整。')">
+            <span class="opt-marker">C</span>設定 MCP 取得 Git 資料 + 建立「Bug 摘要報告 Skill」定義格式 + Automation 每天定時觸發
+          </button>
+        </div>
+        <div class="feedback-msg" id="fb7"></div>
+      </div>
+    </div>
+    <button class="next-btn" id="next7" onclick="showSummary()">🏆 完成課程，查看成績！</button>
+  </div>
+
+  <!-- ===================== SUMMARY ===================== -->
+  <div class="chapter" id="summary-panel" style="display:none;">
+    <div class="card" style="text-align:center; border-left-color:var(--mint)">
+      <div class="trophy">🏆</div>
+      <h2 style="font-size:1.6rem">恭喜完成 AI Agent 最佳實踐課程！</h2>
+      <p style="margin-top:8px; color:var(--muted)">你已掌握 AI Agent 核心工作方法</p>
+
+      <div class="score-ring">
+        <svg viewBox="0 0 100 100" width="120" height="120">
+          <circle class="ring-bg"   cx="50" cy="50" r="48"/>
+          <circle class="ring-fill" id="ringFill" cx="50" cy="50" r="48"/>
+        </svg>
+        <div class="ring-text" id="ringText">0/8</div>
+      </div>
+
+      <ul class="checklist" id="summary-list"></ul>
+
+      <div style="margin-top:20px; padding:16px; background:var(--bg); border-radius:10px; text-align:left; font-size:.88rem;">
+        <strong style="color:var(--navy)">📌 你學到的核心技能：</strong>
+        <ol style="margin-top:10px; padding-left:18px; line-height:2;">
+          <li>撰寫包含四要素的高品質 Prompt</li>
+          <li>複雜任務先規劃（Plan First）</li>
+          <li>用 AGENTS.md 建立可重用的工作規範</li>
+          <li>要求 Agent 自我驗證與審查</li>
+          <li>用 MCP 連接外部工具</li>
+          <li>把重複工作打包成 Skill</li>
+          <li>設定 Automation 讓工作全自動</li>
+        </ol>
+      </div>
+
+      <button class="restart-btn" onclick="restartCourse()">🔄 重新挑戰</button>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ── State ──
+const TOTAL = 8;
+let completed  = new Array(TOTAL).fill(false);   // chapter done?
+let correctAns = new Array(TOTAL).fill(false);    // quiz correct?
+let currentCh  = 0;
+
+// ── Helpers ──
+function goChapter(n) {
+  const btn = document.querySelector(`[data-ch="${n}"]`);
+  if(btn.classList.contains('locked')) return;
+
+  document.querySelectorAll('.chapter').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.chapter-btn').forEach(b=>b.classList.remove('active'));
+
+  document.getElementById('ch'+n).classList.add('active');
+  btn.classList.add('active');
+  currentCh = n;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function answerQ(chIdx, optIdx, isCorrect, msg) {
+  const q    = document.getElementById('q'+chIdx);
+  const fb   = document.getElementById('fb'+chIdx);
+  const btns = q.querySelectorAll('.option-btn');
+  btns.forEach(b=>b.disabled=true);
+  btns[optIdx].classList.add(isCorrect ? 'correct' : 'wrong');
+
+  fb.textContent = msg;
+  fb.className   = 'feedback-msg show ' + (isCorrect ? 'ok' : 'err');
+
+  if(isCorrect) {
+    correctAns[chIdx] = true;
+    document.getElementById('next'+chIdx).classList.add('visible');
+  } else {
+    // allow retry after 1s
+    setTimeout(()=>{
+      btns.forEach(b=>{b.disabled=false; b.classList.remove('wrong','correct');});
+      fb.className='feedback-msg';
+    }, 1800);
+  }
+}
+
+function nextChapter(from) {
+  completed[from] = true;
+  updateProgress();
+
+  const next = from + 1;
+  if(next >= TOTAL) return;
+
+  const nextBtn = document.querySelector(`[data-ch="${next}"]`);
+  nextBtn.classList.remove('locked');
+  nextBtn.classList.add('done');   // mark prev
+  document.querySelector(`[data-ch="${from}"]`).classList.remove('active');
+  document.querySelector(`[data-ch="${from}"]`).classList.add('done');
+
+  goChapter(next);
+}
+
+function updateProgress() {
+  const done = completed.filter(Boolean).length;
+  document.getElementById('prog-text').textContent = done + ' / ' + TOTAL + ' 章節完成';
+  document.getElementById('prog-fill').style.width = (done/TOTAL*100) + '%';
+}
+
+function showSummary() {
+  completed[7] = true;
+  updateProgress();
+
+  document.querySelectorAll('.chapter').forEach(c=>c.style.display='none');
+  document.querySelectorAll('.chapter-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('summary-panel').style.display='block';
+
+  const score = correctAns.filter(Boolean).length;
+  // ring
+  const circ = 2*Math.PI*48;
+  const pct  = score/TOTAL;
+  document.getElementById('ringFill').style.strokeDashoffset = circ*(1-pct);
+  document.getElementById('ringText').textContent = score+'/'+TOTAL;
+
+  // checklist
+  const chapters = ['什麼是 AI Agent','Prompt 四要素','先規劃再行動','AGENTS.md 說明書','驗證與審查','MCP 連接外部工具','Skills 技能包','自動化排程'];
+  const list = document.getElementById('summary-list');
+  list.innerHTML = '';
+  chapters.forEach((c,i)=>{
+    const li = document.createElement('li');
+    li.innerHTML = c + (correctAns[i] ? ' <span style="color:var(--success);font-weight:700">✓ 答對</span>' : ' <span style="color:var(--muted)">○</span>');
+    list.appendChild(li);
+  });
+
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function restartCourse() {
+  completed  = new Array(TOTAL).fill(false);
+  correctAns = new Array(TOTAL).fill(false);
+
+  document.getElementById('summary-panel').style.display='none';
+  document.querySelectorAll('.chapter').forEach((c,i)=>{c.style.display=''; c.classList.remove('active');});
+
+  document.querySelectorAll('.chapter-btn').forEach((b,i)=>{
+    b.classList.remove('active','done');
+    if(i>0) b.classList.add('locked');
+  });
+
+  // reset quizzes
+  for(let i=0;i<TOTAL;i++){
+    const q = document.getElementById('q'+i);
+    if(!q) continue;
+    q.querySelectorAll('.option-btn').forEach(b=>{b.disabled=false;b.classList.remove('correct','wrong');});
+    const fb=document.getElementById('fb'+i);
+    if(fb) fb.className='feedback-msg';
+    const nb=document.getElementById('next'+i);
+    if(nb) nb.classList.remove('visible');
+  }
+  updateProgress();
+  goChapter(0);
+}
+</script>
+</body>
+</html>
